@@ -59,7 +59,7 @@ denies() {
 check "plan: edit запрещён" "deny" "$(permission_rule plan edit '*')"
 check "reviewer: edit запрещён" "deny" "$(permission_rule reviewer edit '*')"
 check "implementer: edit разрешён" "allow" "$(permission_rule implementer edit '*')"
-for gitcmd in 'git reset*' 'git rebase*' 'git merge*'; do
+for gitcmd in 'git reset*' 'git checkout*' 'git rebase*' 'git merge*'; do
     if denies implementer bash "$gitcmd"; then
         ok "implementer: $gitcmd запрещён"
     else

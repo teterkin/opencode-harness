@@ -29,6 +29,17 @@ check_absent() {
     fi
 }
 
+check_eq() {
+    local label="$1" expected="$2" actual="$3"
+    if [[ "$actual" == "$expected" ]]; then
+        printf '  ok   %s\n' "$label"
+        PASS=$((PASS + 1))
+    else
+        printf '  FAIL %s\n       ожидал: [%s]\n       получил: [%s]\n' "$label" "$expected" "$actual"
+        FAIL=$((FAIL + 1))
+    fi
+}
+
 echo "== пустой конфиг =="
 mkdir -p "$FAKE_CONFIG"
 OPENCODE_CONFIG_DIR="$FAKE_CONFIG" "$REPO_DIR/install.sh" >/dev/null
@@ -70,7 +81,7 @@ check "второй провайдер сохранён" "lmstudio" "$RESULT"
 check "mcp-конфиг сохранён" "playwright" "$RESULT"
 check "model переопределён харнесом" "opencode/big-pickle" "$RESULT"
 check_absent "чужой model не остался" "some/other-model" "$RESULT"
-check "JSON валиден" "" "$(python3 -c "import json,sys; json.load(open('$T2/opencode.json'))" 2>&1)"
+check_eq "JSON валиден" "" "$(python3 -c "import json,sys; json.load(open('$T2/opencode.json'))" 2>&1)"
 
 check "прежнее правило в бэкапе" "прежнее правило" \
     "$(cat "$T2"/backup-*/AGENTS.md 2>&1)"
@@ -82,7 +93,7 @@ echo
 echo "== идемпотентность =="
 OPENCODE_CONFIG_DIR="$T2" "$REPO_DIR/install.sh" >/dev/null
 OPENCODE_CONFIG_DIR="$T2" "$REPO_DIR/install.sh" >/dev/null
-check "повторный запуск не ломает JSON" "" \
+check_eq "повторный запуск не ломает JSON" "" \
     "$(python3 -c "import json; json.load(open('$T2/opencode.json'))" 2>&1)"
 check "секрет пережил три запуска" "sk-SECRET-KEEP-ME" "$(cat "$T2/opencode.json")"
 
@@ -112,9 +123,9 @@ check_absent "скилл убран" "tdd-workflow" "$(find "$T4/skill" -maxdept
 check "чужой файл не тронут" "мои заметки" "$(cat "$T4/mynotes.md" 2>&1)"
 check "секрет провайдера пережил снос" "sk-SECRET-KEEP-ME" "$(cat "$T4/opencode.json")"
 check_absent "default_agent убран" "implementer" "$(cat "$T4/opencode.json")"
-check "JSON валиден после сноса" "" \
+check_eq "JSON валиден после сноса" "" \
     "$(python3 -c "import json; json.load(open('$T4/opencode.json'))" 2>&1)"
-check "повторный снос не падает" "0" \
+check_eq "повторный снос не падает" "0" \
     "$(OPENCODE_CONFIG_DIR="$T4" "$REPO_DIR/uninstall.sh" >/dev/null 2>&1; echo $?)"
 
 echo
@@ -126,7 +137,7 @@ BROKEN='{ "model": '
 printf '%s' "$BROKEN" > "$T3/opencode.json"
 
 ERR="$(OPENCODE_CONFIG_DIR="$T3" "$REPO_DIR/install.sh" 2>&1)" && RC=0 || RC=$?
-check "битый JSON валит установку" "1" "$RC"
+check_eq "битый JSON валит установку" "1" "$RC"
 check "причина названа" "не является валидным JSON" "$ERR"
 check "битый файл не затёрт" "$BROKEN" "$(cat "$T3/opencode.json")"
 
@@ -138,11 +149,29 @@ mkdir -p "$T5"
 NARROW_PATH="$(dirname "$(command -v python3)"):/usr/bin:/bin"
 
 ERR="$(env PATH="$NARROW_PATH" OPENCODE_CONFIG_DIR="$T5" "$REPO_DIR/install.sh" 2>&1)" && RC=0 || RC=$?
-check "нет opencode валит установку" "1" "$RC"
+check_eq "нет opencode валит установку" "1" "$RC"
 check "причина названа" "opencode не найден" "$ERR"
 check "ссылка на документацию дана" "opencode.ai/docs" "$ERR"
 check_absent "бэкап не создан" "backup-" "$(ls -A "$T5")"
 check_absent "правила не скопированы" "AGENTS.md" "$(ls -A "$T5")"
+
+echo
+echo "== нет python3 =="
+T6="$(mktemp -d /tmp/harness-test6-XXXX)"
+T7="$(mktemp -d /tmp/harness-test7-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T3" "$T4" "$T5" "$T6" "$T7"' EXIT
+mkdir -p "$T6"
+for tool in bash mkdir cp date basename rm ls env dirname opencode; do
+    ln -s "$(command -v "$tool")" "$T7/$tool"
+done
+
+ERR="$(env PATH="$T7" OPENCODE_CONFIG_DIR="$T6" "$REPO_DIR/install.sh" 2>&1)" && RC=0 || RC=$?
+check_eq "нет python3 валит установку" "1" "$RC"
+check "причина названа" "python3 не найден" "$ERR"
+check "ссылка на загрузку дана" "python.org" "$ERR"
+check_absent "ошибка не про opencode" "opencode не найден" "$ERR"
+check_absent "бэкап не создан" "backup-" "$(ls -A "$T6")"
+check_absent "правила не скопированы" "AGENTS.md" "$(ls -A "$T6")"
 
 echo
 printf 'итого: %d ok, %d провалено\n' "$PASS" "$FAIL"

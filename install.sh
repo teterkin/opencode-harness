@@ -18,6 +18,9 @@ fail() { printf 'ошибка: %s\n' "$1" >&2; exit 1; }
 command -v opencode >/dev/null 2>&1 \
     || fail "opencode не найден в PATH. Установи его: https://opencode.ai/docs/#install"
 
+command -v python3 >/dev/null 2>&1 \
+    || fail "python3 не найден в PATH. Он нужен, чтобы наложить opencode.json: https://www.python.org/downloads/"
+
 if [[ -d "$CONFIG_DIR" ]]; then
     info "конфиг найден: $CONFIG_DIR"
 else
