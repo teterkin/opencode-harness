@@ -127,7 +127,7 @@ curl -fsSL https://opencode.ai/install | bash
 ## Установка
 
 ```bash
-git clone <репозиторий> && cd harness
+git clone <репозиторий> && cd opencode-harness
 ./install.sh
 ```
 
