@@ -131,5 +131,19 @@ check "причина названа" "не является валидным JS
 check "битый файл не затёрт" "$BROKEN" "$(cat "$T3/opencode.json")"
 
 echo
+echo "== нет opencode =="
+T5="$(mktemp -d /tmp/harness-test5-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T3" "$T5"' EXIT
+mkdir -p "$T5"
+NARROW_PATH="$(dirname "$(command -v python3)"):/usr/bin:/bin"
+
+ERR="$(env PATH="$NARROW_PATH" OPENCODE_CONFIG_DIR="$T5" "$REPO_DIR/install.sh" 2>&1)" && RC=0 || RC=$?
+check "нет opencode валит установку" "1" "$RC"
+check "причина названа" "opencode не найден" "$ERR"
+check "ссылка на документацию дана" "opencode.ai/docs" "$ERR"
+check_absent "бэкап не создан" "backup-" "$(ls -A "$T5")"
+check_absent "правила не скопированы" "AGENTS.md" "$(ls -A "$T5")"
+
+echo
 printf 'итого: %d ok, %d провалено\n' "$PASS" "$FAIL"
 [[ "$FAIL" -eq 0 ]]

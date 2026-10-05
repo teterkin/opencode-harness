@@ -5,8 +5,6 @@ permission:
   edit: allow
   bash:
     "*": allow
-    "git commit*": deny
-    "git push*": deny
     "git reset*": deny
     "git checkout*": deny
     "git rebase*": deny

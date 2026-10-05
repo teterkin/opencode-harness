@@ -15,6 +15,9 @@ fail() { printf 'ошибка: %s\n' "$1" >&2; exit 1; }
 
 [[ -d "$REPO_DIR/agents" ]] || fail "не найдена папка agents рядом с install.sh"
 
+command -v opencode >/dev/null 2>&1 \
+    || fail "opencode не найден в PATH. Установи его: https://opencode.ai/docs/#install"
+
 if [[ -d "$CONFIG_DIR" ]]; then
     info "конфиг найден: $CONFIG_DIR"
 else
