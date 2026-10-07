@@ -50,6 +50,10 @@ check "reviewer установлен" "strict reviewer" "$(cat "$FAKE_CONFIG/age
 check "команда prd" "Write a PRD for the following" "$(cat "$FAKE_CONFIG/command/prd.md" 2>&1)"
 check "скилл tdd-workflow" "TDD workflow" "$(cat "$FAKE_CONFIG/skill/tdd-workflow/SKILL.md" 2>&1)"
 check "скилл prd-authoring" "PRD first" "$(cat "$FAKE_CONFIG/skill/prd-authoring/SKILL.md" 2>&1)"
+check "правило: проверка git на старте задачи" "git rev-parse --is-inside-work-tree" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: напоминание про git" "work is always done in git" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "model прописан" "opencode/big-pickle" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "default_agent прописан" "implementer" "$(cat "$FAKE_CONFIG/opencode.json")"
 

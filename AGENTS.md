@@ -52,6 +52,10 @@ If a check cannot be run, say so explicitly instead of implying success.
 
 ## 6. Git discipline
 
+- At the start of any task, check that the working directory is an initialized
+  git repository (`git rev-parse --is-inside-work-tree`). If it is not, remind
+  the user once per session that in real projects work is always done in git
+  and offer to run `git init`.
 - Never run `git commit`, `git push`, `git checkout`, `git reset`, `git rebase`,
   `git merge`, or history-rewriting commands unless the user explicitly asks.
 - Never commit secrets, credentials, or `.env`-style files.

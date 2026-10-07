@@ -72,7 +72,7 @@ skill/prd-authoring   шаблон PRD, читается перед планир
 
 | Файл в репозитории | Куда устанавливается | Роль |
 | --- | --- | --- |
-| `AGENTS.md` | `~/.config/opencode/AGENTS.md` | Базовые правила. Попадают в контекст каждой сессии: TDD, PRD перед фичей, план до правок, атомарные изменения, реальная проверка, запрет git без спроса |
+| `AGENTS.md` | `~/.config/opencode/AGENTS.md` | Базовые правила. Попадают в контекст каждой сессии: TDD, PRD перед фичей, план до правок, атомарные изменения, реальная проверка, запрет git без спроса, проверка git-репозитория на старте задачи |
 | `skills/tdd-workflow/SKILL.md` | `~/.config/opencode/skill/tdd-workflow/` | Строгий цикл red → green → refactor. Подгружается моделью перед написанием production-кода |
 | `skills/prd-authoring/SKILL.md` | `~/.config/opencode/skill/prd-authoring/` | Шаблон PRD и правило «стоп, жди подтверждения» |
 | `agents/implementer.md` | `~/.config/opencode/agent/implementer.md` | Агент по умолчанию (`default_agent`). Планирует, пишет тест, наблюдает red, делает минимум до green, проверяет |
@@ -317,6 +317,10 @@ assertions, расползание скоупа, безопасность и р�
    `checkout`, `rebase`, `merge` запрещены без прямого указания в сообщении.
    В `implementer` `reset`, `checkout`, `rebase` и `merge` запрещены ещё и на
    уровне permissions, а `commit` и `push` остаются на одном слове.
+7. **В начале задачи — git.** Рабочая папка проверяется на инициализированный
+   репозиторий (`git rev-parse --is-inside-work-tree`). Git не найден — один
+   раз за сессию напомни, что в реальных проектах работа всегда ведётся в git,
+   и предложи запустить `git init`.
 
 ## Настройка нового проекта
 
