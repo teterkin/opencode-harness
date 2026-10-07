@@ -56,3 +56,19 @@ If a check cannot be run, say so explicitly instead of implying success.
   `git merge`, or history-rewriting commands unless the user explicitly asks.
 - Never commit secrets, credentials, or `.env`-style files.
 - Keep the working tree changes reviewable; do not stage everything blindly.
+
+## 7. Pin every dependency
+
+- Never install a dependency without an exact version (`pkg==1.2.3`).
+  Floating specs (`^`, `~`, `>=`, `latest`) break at the worst possible
+  moment, in someone else's session, with no obvious cause.
+- Pins live in a committed file (`requirements*.txt`, `pyproject.toml`,
+  `package.json` lockfile, `Dockerfile` `ARG`), never only in a shell
+  history or a chat message.
+- Anything baked into a shared/base image gets a full transitive freeze
+  (`pip freeze`), not just top-level pins — a fresh resolve is a fresh
+  chance to break.
+- Upgrading a pin is a deliberate, isolated change: one commit, tests run,
+  output reported. A rebuild must never silently pick up new versions.
+- Base images and external sources are pinned too: image tag (or digest),
+  and `git clone` by commit SHA with an explicit ref.
