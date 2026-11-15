@@ -10,6 +10,16 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 
+DRY_RUN=0
+case "${1:-}" in
+    --dry-run) DRY_RUN=1 ;;
+    "") ;;
+    *)
+        printf 'использование: %s [--dry-run]\n' "${BASH_SOURCE[0]}" >&2
+        exit 64
+        ;;
+esac
+
 info() { printf '  %s\n' "$1"; }
 fail() { printf 'ошибка: %s\n' "$1" >&2; exit 1; }
 
@@ -41,6 +51,97 @@ then
     :
 else
     fail "opencode $OPENCODE_VERSION ниже минимума $min. Обнови opencode: https://opencode.ai/docs/#install"
+fi
+
+if [[ -f "$CONFIG_DIR/opencode.json" ]]; then
+    python3 - "$CONFIG_DIR/opencode.json" <<'PY'
+import json
+import sys
+
+try:
+    with open(sys.argv[1]) as handle:
+        json.load(handle)
+except json.JSONDecodeError as error:
+    sys.exit(f"ошибка: {sys.argv[1]} не является валидным JSON: {error}")
+PY
+fi
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+    STAGE="$(mktemp -d "${TMPDIR:-/tmp}/harness-plan-XXXXXX")"
+    SNAPSHOT="$STAGE/before"
+    PLANNED="$STAGE/after"
+    mkdir -p "$SNAPSHOT" "$PLANNED"
+    for name in AGENTS.md opencode.json agent command skill; do
+        if [[ -e "$CONFIG_DIR/$name" ]]; then
+            cp -R "$CONFIG_DIR/$name" "$SNAPSHOT/$name"
+        fi
+    done
+    cp -R "$SNAPSHOT/." "$PLANNED/"
+    if ! OPENCODE_CONFIG_DIR="$PLANNED" "$REPO_DIR/install.sh" >/dev/null; then
+        rm -rf "$STAGE"
+        exit 1
+    fi
+    printf 'план установки (--dry-run), ничего не изменено:\n'
+    python3 - "$SNAPSHOT" "$PLANNED" <<'PY'
+import json
+import os
+import sys
+
+before_root, after_root = sys.argv[1], sys.argv[2]
+IGNORED = {"harness-installed.txt"}
+
+
+def collect(root):
+    found = set()
+    for base, dirs, names in os.walk(root):
+        dirs[:] = [name for name in dirs if not name.startswith("backup-")]
+        for name in names:
+            path = os.path.join(base, name)
+            rel = os.path.relpath(path, root)
+            if rel.split(os.sep)[0] in IGNORED:
+                continue
+            found.add(rel)
+    return found
+
+
+def read(path):
+    with open(path, "rb") as handle:
+        return handle.read()
+
+
+def load_config(root):
+    path = os.path.join(root, "opencode.json")
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+before = collect(before_root)
+after = collect(after_root)
+
+for rel in sorted(after - before):
+    print("  создать " + rel)
+for rel in sorted(before - after):
+    print("  удалить " + rel)
+for rel in sorted(before & after):
+    left = read(os.path.join(before_root, rel))
+    right = read(os.path.join(after_root, rel))
+    if left != right:
+        print("  обновить " + rel)
+
+old, new = load_config(before_root), load_config(after_root)
+for key in sorted(set(old) | set(new)):
+    if key not in old:
+        print("  opencode.json: +" + key)
+    elif key not in new:
+        print("  opencode.json: -" + key)
+    elif old[key] != new[key]:
+        print("  opencode.json: ~" + key)
+PY
+    rm -rf "$STAGE"
+    printf '\nБэкап, манифест и конфиг не изменены: это план.\n'
+    exit 0
 fi
 
 if [[ -d "$CONFIG_DIR" ]]; then
@@ -175,7 +276,7 @@ info "opencode.json обновлён: model, default_agent, permissions; про�
 info "манифест установки: $MANIFEST"
 
 printf '\nУстановлено в %s\n' "$CONFIG_DIR"
-printf 'Выйди из opencode и запусти заново — конфиг читается только при старте.\n\n'
+printf 'Конфиг подхватится сам: opencode следит за файлами. Если что-то не применилось — /reload.\n\n'
 printf 'Проверить:\n'
 printf '  opencode api GET /api/agent\n'
 printf '  opencode api GET /api/command\n'

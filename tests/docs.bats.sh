@@ -87,6 +87,16 @@ else
     PASS=$((PASS + 1))
 fi
 
+contains "README: /reload вместо перезапуска" "/reload" "README.md"
+
+if grep -q 'запусти заново' "$REPO_DIR/README.md"; then
+    printf '  FAIL README: остался совет перезапустить opencode\n'
+    FAIL=$((FAIL + 1))
+else
+    printf '  ok   README: нет совета перезапустить opencode\n'
+    PASS=$((PASS + 1))
+fi
+
 echo
 echo "== AGENTS.md: каркас проекта =="
 contains "AGENTS.md: команды проверок" "typecheck" "AGENTS.md"

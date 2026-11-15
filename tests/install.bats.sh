@@ -93,6 +93,8 @@ check "reviewer: отдельная модель" "model: opencode/deepseek-v4-p
 check "reviewer: потолок шагов" "steps: 20" "$(cat "$FAKE_CONFIG/agent/reviewer.md")"
 check_absent "в подсказках нет opencode debug skill" "debug skill" "$OUT"
 check_absent "в подсказках нет opencode debug agent" "debug agent" "$OUT"
+check_absent "в подсказках нет совета перезапуска" "запусти заново" "$OUT"
+check "в подсказках есть /reload" "/reload" "$OUT"
 
 echo
 echo "== шаблон конфига =="
@@ -175,6 +177,60 @@ check_eq "старый файл получил ровно один блок" "1"
 check_eq "правила не задвоились" "1" "$(grep -c 'TDD is mandatory' "$T12/AGENTS.md")"
 
 echo
+echo "== dry-run =="
+T13="$(mktemp -d /tmp/harness-test13-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T4" "$T8" "$T12" "$T13"' EXIT
+hash_tree() {
+    python3 - "$1" <<'PY'
+import hashlib
+import os
+import sys
+
+root = sys.argv[1]
+digest = hashlib.sha256()
+for base, dirs, names in os.walk(root):
+    dirs.sort()
+    for name in sorted(names):
+        path = os.path.join(base, name)
+        digest.update(os.path.relpath(path, root).encode())
+        with open(path, "rb") as handle:
+            digest.update(handle.read())
+print(digest.hexdigest())
+PY
+}
+mkdir -p "$T13/empty"
+OUT="$(OPENCODE_CONFIG_DIR="$T13/empty" "$REPO_DIR/install.sh" --dry-run 2>&1)" && RC=0 || RC=$?
+check_eq "dry-run: код 0" "0" "$RC"
+check_eq "dry-run: каталог не тронут" "" "$(ls -A "$T13/empty")"
+check "dry-run: план правил" "создать AGENTS.md" "$OUT"
+check "dry-run: план конфига" "создать opencode.json" "$OUT"
+check "dry-run: план агента" "создать agent/implementer.md" "$OUT"
+
+mkdir -p "$T13/full"
+cat > "$T13/full/opencode.json" <<'JSON'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/deepseek-v4.1-flash",
+  "mcp": { "servers": { "blender": { "type": "local", "disabled": true } } }
+}
+JSON
+echo "мое правило" > "$T13/full/AGENTS.md"
+BEFORE="$(hash_tree "$T13/full")"
+OUT="$(OPENCODE_CONFIG_DIR="$T13/full" "$REPO_DIR/install.sh" --dry-run 2>&1)" && RC=0 || RC=$?
+check_eq "dry-run на готовом конфиге: код 0" "0" "$RC"
+check_eq "dry-run: файлы не изменены" "$BEFORE" "$(hash_tree "$T13/full")"
+check_absent "dry-run: бэкап не создан" "backup-" "$(ls -A "$T13/full")"
+check "dry-run: план обновления конфига" "обновить opencode.json" "$OUT"
+check "dry-run: добавленные ключи" "+permissions" "$OUT"
+check_absent "dry-run: mcp не удаляется" "-mcp" "$OUT"
+check_absent "dry-run: выбранная модель не меняется" "~model" "$OUT"
+check "dry-run: выбор модели сохранён" "opencode/deepseek-v4.1-flash" "$(cat "$T13/full/opencode.json")"
+
+OUT="$(OPENCODE_CONFIG_DIR="$T13/empty" "$REPO_DIR/install.sh" --nope 2>&1)" && RC=0 || RC=$?
+check_eq "неизвестный флаг: код 64" "64" "$RC"
+check "неизвестный флаг: подсказка" "--dry-run" "$OUT"
+
+echo
 echo "== uninstall =="
 T4="$(mktemp -d /tmp/harness-test4-XXXX)"
 trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T3" "$T4"' EXIT
@@ -249,6 +305,12 @@ ERR="$(OPENCODE_CONFIG_DIR="$T3" "$REPO_DIR/install.sh" 2>&1)" && RC=0 || RC=$?
 check_eq "битый JSON валит установку" "1" "$RC"
 check "причина названа" "не является валидным JSON" "$ERR"
 check "битый файл не затёрт" "$BROKEN" "$(cat "$T3/opencode.json")"
+check_eq "битый JSON: ничего не создано" "opencode.json" "$(ls -A "$T3")"
+
+ERR="$(OPENCODE_CONFIG_DIR="$T3" "$REPO_DIR/install.sh" --dry-run 2>&1)" && RC=0 || RC=$?
+check_eq "dry-run на битом JSON: код 1" "1" "$RC"
+check "dry-run на битом JSON: причина названа" "не является валидным JSON" "$ERR"
+check_eq "dry-run на битом JSON: ничего не создано" "opencode.json" "$(ls -A "$T3")"
 
 echo
 echo "== нет opencode =="
@@ -298,6 +360,11 @@ check "причина названа" "ниже минимума" "$ERR"
 check "пин назван" "2.3.0" "$ERR"
 check_absent "бэкап не создан" "backup-" "$(ls -A "$T10")"
 check_absent "правила не скопированы" "AGENTS.md" "$(ls -A "$T10")"
+
+ERR="$(env PATH="$T11:$(dirname "$(command -v python3)"):/usr/bin:/bin" \
+    OPENCODE_CONFIG_DIR="$T10" "$REPO_DIR/install.sh" --dry-run 2>&1)" && RC=0 || RC=$?
+check_eq "dry-run на старой версии: код 1" "1" "$RC"
+check_absent "dry-run на старой версии: ничего не создано" "AGENTS.md" "$(ls -A "$T10")"
 
 echo
 printf 'итого: %d ok, %d провалено\n' "$PASS" "$FAIL"
