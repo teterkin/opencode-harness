@@ -10,7 +10,7 @@ template: |
   2. Write the `CHANGELOG.md` entry for that version, newest on top.
   3. Update the README versions and compatibility section if behavior changed.
   4. Run the project's real checks and paste the output. Never tag with red
-     checks.
+     checks. Run `bash tests/repo-meta.sh` as well when the project has it.
   5. Confirm the bump and the changelog text with me before the tag.
   6. Create the annotated tag `vX.Y.Z`.
   7. Ask separately before pushing the tag and before publishing the GitHub

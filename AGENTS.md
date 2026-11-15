@@ -126,6 +126,10 @@ covers the release only — it does not cover pushing pending commits.
 
 - A project with a PRD also has: `LICENSE`, `README.md`, `CHANGELOG.md`,
   `TODO.md`, `AGENTS.md`, and confirmed PRDs in `docs/prd/`.
+- Repository metadata is part of the baseline: `description`, `topics`,
+  `homepage`, `visibility`. An empty description or fewer than five topics is a
+  defect. Read with `gh repo view`, write with `gh repo edit`, and keep it in
+  sync with what the README promises.
 - README order: description, install, usage with examples, architecture,
   versions and releases. Ask which license to use; MIT is the default.
 - Docs change in the same diff as the behavior. A stale README is a bug, not a

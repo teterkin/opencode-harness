@@ -5,6 +5,18 @@
 
 ## [Unreleased]
 
+## [2.6.0] — 2026-11-15
+
+### Added
+
+- `skills/project-kit`: раздел «Repository metadata» — требования к
+  `description`, `homepage`, `topics` и `visibility`, команды чтения и записи.
+- `tests/repo-meta.sh` — opt-in проверка метаданных на GitHub: непустой
+  `description`, 5–10 topics в kebab-case без дублей, `homepage` пустой или
+  `https://`. Коды выхода `0/1/2/3`.
+- Правило 9: метаданные репозитория входят в docs-baseline.
+- Репозиторий заполнен: русское описание и 7 topics.
+
 ## [2.5.0] — 2026-11-15
 
 ### Changed

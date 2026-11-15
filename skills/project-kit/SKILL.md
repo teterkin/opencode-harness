@@ -24,6 +24,24 @@ Every project with a confirmed PRD has, in this order of importance:
 If a file is missing, say so once and offer to create it. Do not create a
 README full of guesses: read the code and the commands first.
 
+## Repository metadata
+
+Set the repository metadata before calling the project started. Empty fields are
+a defect, not a default.
+
+- `description` — one line, no emoji, no quotes: what it is and who it is for.
+  Not a slogan, not the name repeated.
+- `homepage` — a real documentation URL, or empty. A placeholder is worse than
+  nothing.
+- `topics` — 5 to 10, lowercase kebab-case, no duplicates: language, domain,
+  tool. `opencode`, `ai-agents`, `tdd`.
+- `visibility` — chosen on purpose at creation. A private project that becomes
+  public by accident leaks its whole history.
+
+Read the current state with
+`gh repo view --json description,homepageUrl,repositoryTopics,visibility` and
+write it with `gh repo edit --description "..." --add-topic <topic>`.
+
 ## Project AGENTS.md core
 
 The project `AGENTS.md` states, exactly and only if true:

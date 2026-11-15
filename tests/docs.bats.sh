@@ -83,6 +83,10 @@ contains "README: граница проекта" "external_directory: ask" "READ
 contains "README: корень репозитория" "git rev-parse --show-toplevel" "README.md"
 contains "README: семь шагов" "семи шагов" "README.md"
 contains "workflow: отдельные согласия" "отдельного согласия" "docs/workflow.md"
+contains "project-kit: метаданные репозитория" "Repository metadata" \
+    "skills/project-kit/SKILL.md"
+contains "project-kit: gh repo edit" "gh repo edit" "skills/project-kit/SKILL.md"
+contains "AGENTS.md: метаданные репозитория" "Repository metadata" "AGENTS.md"
 
 if grep -q 'opencode debug skill\|opencode debug agent' "$REPO_DIR/README.md"; then
     printf '  FAIL README: остались команды opencode v1 (debug skill/agent)\n'
