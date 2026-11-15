@@ -116,5 +116,12 @@ contains "шаблон PRD: критерии приёмки" "Acceptance criteri
 contains "шаблон PRD: источники" "Sources and assumptions" "templates/PRD.md"
 
 echo
+echo "== workflow =="
+contains "workflow: проверка границы" "Проверка границы" "docs/workflow.md"
+contains "workflow: соседний репозиторий" "Соседний репозиторий" "docs/workflow.md"
+contains "workflow: запись вне проекта" "Запись вне проекта" "docs/workflow.md"
+contains "workflow: самостоятельный коммит" "Самостоятельный коммит" "docs/workflow.md"
+
+echo
 printf 'итого: %d ok, %d провалено\n' "$PASS" "$FAIL"
 [[ "$FAIL" -eq 0 ]]
