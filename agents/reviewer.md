@@ -1,5 +1,7 @@
 ---
 description: Read-only reviewer. Reviews a diff against the project's engineering rules before the user commits.
+model: opencode/deepseek-v4-pro#high
+steps: 20
 mode: subagent
 permissions:
   - action: edit

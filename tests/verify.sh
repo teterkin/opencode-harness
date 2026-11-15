@@ -65,6 +65,18 @@ print(next(item['mode'] for item in json.load(sys.stdin)['data'] if item['id'] =
 "
 }
 
+agent_field() {
+    printf '%s' "$AGENTS" | python3 -c "
+import json, sys
+agent = next(item for item in json.load(sys.stdin)['data'] if item['id'] == '$1')
+model = agent.get('model') or {}
+if '$2' == 'model':
+    print('%s/%s#%s' % (model.get('providerID'), model.get('id'), model.get('variant')))
+else:
+    print(agent.get('$2', 'absent'))
+"
+}
+
 permission_rule() {
     printf '%s' "$AGENTS" | python3 "$SCRIPT_DIR/find_permission.py" "$1" "$2" "$3"
 }
@@ -80,6 +92,9 @@ for agent in implementer plan reviewer; do
 done
 check_eq "implementer: primary" "primary" "$(agent_mode implementer)"
 check_eq "reviewer: subagent" "subagent" "$(agent_mode reviewer)"
+check_eq "reviewer: отдельная модель" "opencode/deepseek-v4-pro#high" \
+    "$(agent_field reviewer model)"
+check_eq "reviewer: потолок шагов" "20" "$(agent_field reviewer steps)"
 
 echo
 echo "== permissions =="

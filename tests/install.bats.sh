@@ -61,6 +61,8 @@ check_absent "opencode.json: нет deprecated permission" '"permission":' "$(ca
 check "implementer: формат v2 (permissions)" "permissions:" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
 check_absent "implementer: нет deprecated permission" "permission:" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
 check "implementer: git merge запрещён" "git merge*" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
+check "reviewer: отдельная модель" "model: opencode/deepseek-v4-pro#high" "$(cat "$FAKE_CONFIG/agent/reviewer.md")"
+check "reviewer: потолок шагов" "steps: 20" "$(cat "$FAKE_CONFIG/agent/reviewer.md")"
 
 echo
 echo "== конфиг с провайдером и секретом =="
