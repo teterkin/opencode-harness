@@ -35,7 +35,8 @@ The project `AGENTS.md` states, exactly and only if true:
 - the secrets policy.
 
 Never copy another project's AGENTS.md. A command that does not run is worse
-than a missing line.
+than a missing line. The harness repo ships skeletons: `templates/AGENTS.md`
+and `templates/PRD.md`.
 
 ## Versions and branches
 
