@@ -106,6 +106,14 @@ else
     PASS=$((PASS + 1))
 fi
 
+if grep -q 'чужой `model` переопределяется' "$REPO_DIR/README.md"; then
+    printf '  FAIL README: утверждает, что установщик переопределяет model\n'
+    FAIL=$((FAIL + 1))
+else
+    printf '  ok   README: не утверждает, что установщик переопределяет model\n'
+    PASS=$((PASS + 1))
+fi
+
 echo
 echo "== AGENTS.md: каркас проекта =="
 contains "AGENTS.md: команды проверок" "typecheck" "AGENTS.md"
