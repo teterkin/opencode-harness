@@ -11,7 +11,13 @@ template: |
   3. Update the README versions and compatibility section if behavior changed.
   4. Run the project's real checks and paste the output. Never tag with red
      checks.
-  5. Only then create the annotated tag `vX.Y.Z`.
+  5. Confirm the bump and the changelog text with me before the tag.
+  6. Create the annotated tag `vX.Y.Z`.
+  7. Ask separately before pushing the tag and before publishing the GitHub
+     Release.
 
-  Confirm the bump and the changelog text with me before the tag. Use the
-  `project-kit` skill for the documentation baseline.
+  A release covers the version, the changelog, the tag, the tag push and the
+  published release. It does not cover pushing pending commits: those need their
+  own request, and one push may carry several commits.
+
+  Use the `project-kit` skill for the documentation baseline.

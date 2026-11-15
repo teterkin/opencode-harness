@@ -65,6 +65,14 @@ check could not run, say so instead of implying success.
 
 ## Git
 
-Never run `git commit`, `push`, `reset`, `checkout`, `rebase`, or `merge`
-unless the user explicitly asks in that message. Keep the working tree
-reviewable; do not stage everything blindly.
+Follow the seven steps from the global rules and stop at every gate.
+
+- After the checks are green, show the diff and the real output, then ask
+  "Commit these changes?". A confirmed plan is not a commit.
+- After the commit, ask separately "Push these N commits?". One push may carry
+  several commits, so wait until the batch is ready.
+- Release is a third request: version, changelog, tag, tag push, publishing.
+- Never run `git commit`, `push`, `reset`, `checkout`, `rebase`, `merge`, or
+  history-rewriting commands without a request for that exact step in the
+  current conversation. A permission prompt is a safety net, not a request.
+- Keep the working tree reviewable; do not stage everything blindly.

@@ -81,6 +81,8 @@ contains "README: doctor" "tests/doctor.sh" "README.md"
 contains "README: тринадцать правил" "Тринадцать правил" "README.md"
 contains "README: граница проекта" "external_directory: ask" "README.md"
 contains "README: корень репозитория" "git rev-parse --show-toplevel" "README.md"
+contains "README: семь шагов" "семи шагов" "README.md"
+contains "workflow: отдельные согласия" "отдельного согласия" "docs/workflow.md"
 
 if grep -q 'opencode debug skill\|opencode debug agent' "$REPO_DIR/README.md"; then
     printf '  FAIL README: остались команды opencode v1 (debug skill/agent)\n'

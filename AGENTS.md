@@ -56,7 +56,27 @@ For small, obvious, low-risk changes, skip the PRD and say so in one line.
 - Then report: what changed, what you ran, the actual output, and what remains
   unverified. A check that could not run is stated, not implied as green.
 
-## 6. Git discipline
+## 6. Development flow and git
+
+Work in seven explicit steps, and stop at every gate:
+
+1. Plan — a PRD or a short implementation plan.
+2. Confirmation — wait for the plan to be approved.
+3. Implementation — failing test first, then code, then documentation.
+4. Approval of the result — show the diff and the real output of the project
+   checks, then stop.
+5. Commit — only after a separate request.
+6. Push — only after a separate request. One push may contain several commits.
+7. Release — only after a separate request: version, changelog, tag, tag push
+   and the published release.
+
+Approval of one step never implies the next one: a confirmed plan is not a
+commit, a commit is not a push, and a push is not a release. Asking costs one
+message; an unrequested push costs trust.
+
+`git push` is `ask` in `permissions` as a safety net, not as consent: a click in
+the approval dialog does not replace a request in the conversation. `/release`
+covers the release only — it does not cover pushing pending commits.
 
 - At the start of any task, find the repository root:
   `git rev-parse --show-toplevel`. What matters is the root, not that some
@@ -69,8 +89,8 @@ For small, obvious, low-risk changes, skip the PRD and say so in one line.
   root is the home directory or `/`: those commands stage secrets such as
   `.ssh/` and `.git-credentials`.
 - Never run `git commit`, `git push`, `git checkout`, `git reset`, `git rebase`,
-  `git merge`, or history-rewriting commands unless the user explicitly asks.
-  `/release` counts as asking.
+  `git merge`, or history-rewriting commands unless the user asks for that exact
+  step in the current conversation.
 - Trunk is `main`; work lives in `feat/<slug>`, `fix/<slug>`, `docs/<slug>` or
   `chore/<slug>`.
 - Never commit secrets, credentials, or `.env`-style files.

@@ -88,6 +88,15 @@ check "правило: граница рабочего каталога" "Stay i
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: корень репозитория" "--show-toplevel" "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: домашний каталог — не проект" "home directory" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: семь шагов" "seven explicit steps" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: аппрув результата" "Approval of the result" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: согласия не наследуются" "never implies the next one" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: пуш отдельно" "One push may contain several commits" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: клик не согласие" "safety net, not as consent" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "model прописан" "opencode/big-pickle" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "default_agent прописан" "implementer" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "opencode.json: формат v2 (permissions)" '"permissions"' "$(cat "$FAKE_CONFIG/opencode.json")"
@@ -97,6 +106,10 @@ check_absent "implementer: нет deprecated permission" "permission:" "$(cat "$
 check "implementer: git merge запрещён" "git merge*" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
 check "reviewer: отдельная модель" "model: opencode/deepseek-v4-pro#high" "$(cat "$FAKE_CONFIG/agent/reviewer.md")"
 check "reviewer: потолок шагов" "steps: 20" "$(cat "$FAKE_CONFIG/agent/reviewer.md")"
+check "implementer: гейт коммита" "Commit these changes?" \
+    "$(cat "$FAKE_CONFIG/agent/implementer.md")"
+check "implementer: гейт пуша" "Push these" \
+    "$(cat "$FAKE_CONFIG/agent/implementer.md")"
 check_absent "в подсказках нет opencode debug skill" "debug skill" "$OUT"
 check_absent "в подсказках нет opencode debug agent" "debug agent" "$OUT"
 check_absent "в подсказках нет совета перезапуска" "запусти заново" "$OUT"
