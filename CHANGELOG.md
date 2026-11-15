@@ -5,6 +5,49 @@
 
 ## [Unreleased]
 
+## [2.0.0] — 2026-11-15
+
+Переход на opencode 2.x. Несовместимо с 1.x: минимальная версия — 2.3.0,
+правила прав переписаны на формат v2.
+
+### Added
+
+- `tests/doctor.sh` — сверяет запущенную версию opencode с пином
+  `opencode.version` и ищет рядом более новый бинарь. Коды выхода: `0` —
+  совпадает, `1` — ниже минимума, `2` — дрейф с прогоном самотестов.
+- `tests/doctor.bats.sh` — симуляции версий, путей и старого формата вывода.
+- `tests/version.bats.sh` — `VERSION` = верх `CHANGELOG.md` = тег; режим
+  `--tag` требует существующий аннотированный тег.
+- `tests/docs.bats.sh` — docs-baseline, порядок секций README, шаблоны.
+- `VERSION` и `opencode.version` — версия харнесса и пин инструмента.
+- `commands/release.md` — `/release`: `VERSION`, `CHANGELOG`, README, проверки,
+  тег.
+- `skills/project-kit/SKILL.md` — docs-baseline, каркас проектного `AGENTS.md`,
+  ветки и версии.
+- `templates/AGENTS.md`, `templates/PRD.md` — скелеты для нового проекта.
+- `docs/prd/2.0.md`, `docs/workflow.md`, `TODO.md`.
+- `install.sh` пишет манифест `harness-installed.txt`; `uninstall.sh` сносит по
+  манифесту, с fallback на список файлов 1.0.0.
+- `AGENTS.md`: правила про авто `git init`, ветки `feat/` `fix/` `docs/`
+  `chore/`, SemVer, docs-baseline, обязательный каркас проектного `AGENTS.md`,
+  язык общения и `doctor`.
+
+### Changed
+
+- `tests/verify.sh` читает эффективное состояние через HTTP API opencode
+  (`/api/agent`, `/api/command`, `/api/skill`), а не через `opencode debug
+  agent` и `opencode debug skill`, которых в 2.x нет.
+- `permissions` вместо deprecated `permission`: упорядоченный ruleset
+  `{action, resource, effect}`, действие `shell` вместо `bash`.
+- `reviewer` ходит в `opencode/deepseek-v4-pro#high` с потолком `steps: 20`.
+- Скиллы `tdd-workflow` (исходное состояние, проверка чувствительности, strict
+  `xfail`) и `prd-authoring` (источники и допущения, `docs/prd/<slug>.md`).
+- README перестроен: описание, установка, использование, архитектура, версии.
+
+### Removed
+
+- Поддержка opencode 1.x.
+
 ## [1.0.0] — 2026-11-15
 
 Первый зафиксированный релиз: правила, агенты, команды, скиллы и установщик.

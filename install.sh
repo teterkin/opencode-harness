@@ -21,6 +21,28 @@ command -v opencode >/dev/null 2>&1 \
 command -v python3 >/dev/null 2>&1 \
     || fail "python3 не найден в PATH. Он нужен, чтобы наложить opencode.json: https://www.python.org/downloads/"
 
+PIN_FILE="$REPO_DIR/opencode.version"
+[[ -f "$PIN_FILE" ]] || fail "не найден $PIN_FILE с полями tested и min"
+# shellcheck disable=SC1090
+. "$PIN_FILE"
+OPENCODE_VERSION="$(opencode --version 2>/dev/null \
+    | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+[[ -n "$OPENCODE_VERSION" ]] \
+    || fail "opencode не ответил на --version. Проверь установку: https://opencode.ai/docs/#install"
+if python3 - "$OPENCODE_VERSION" "$min" <<'PY'
+import sys
+
+def key(value):
+    return tuple(int(part) for part in value.split(".") if part.isdigit())
+
+raise SystemExit(0 if key(sys.argv[1]) >= key(sys.argv[2]) else 1)
+PY
+then
+    :
+else
+    fail "opencode $OPENCODE_VERSION ниже минимума $min. Обнови opencode: https://opencode.ai/docs/#install"
+fi
+
 if [[ -d "$CONFIG_DIR" ]]; then
     info "конфиг найден: $CONFIG_DIR"
 else
@@ -111,6 +133,6 @@ info "манифест установки: $MANIFEST"
 printf '\nУстановлено в %s\n' "$CONFIG_DIR"
 printf 'Выйди из opencode и запусти заново — конфиг читается только при старте.\n\n'
 printf 'Проверить:\n'
-printf '  opencode debug config\n'
-printf '  opencode debug skill\n'
-printf '  opencode debug agent implementer\n'
+printf '  opencode api GET /api/agent\n'
+printf '  opencode api GET /api/command\n'
+printf '  opencode api GET /api/skill\n'

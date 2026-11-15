@@ -42,7 +42,7 @@ check_eq() {
 
 echo "== пустой конфиг =="
 mkdir -p "$FAKE_CONFIG"
-OPENCODE_CONFIG_DIR="$FAKE_CONFIG" "$REPO_DIR/install.sh" >/dev/null
+OUT="$(OPENCODE_CONFIG_DIR="$FAKE_CONFIG" "$REPO_DIR/install.sh" 2>&1)"
 
 check "правила на месте" "$FAKE_CONFIG/AGENTS.md" "$(find "$FAKE_CONFIG" -name AGENTS.md | head -1)"
 check "implementer установлен" "You implement changes" "$(cat "$FAKE_CONFIG/agent/implementer.md" 2>&1)"
@@ -83,6 +83,8 @@ check_absent "implementer: нет deprecated permission" "permission:" "$(cat "$
 check "implementer: git merge запрещён" "git merge*" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
 check "reviewer: отдельная модель" "model: opencode/deepseek-v4-pro#high" "$(cat "$FAKE_CONFIG/agent/reviewer.md")"
 check "reviewer: потолок шагов" "steps: 20" "$(cat "$FAKE_CONFIG/agent/reviewer.md")"
+check_absent "в подсказках нет opencode debug skill" "debug skill" "$OUT"
+check_absent "в подсказках нет opencode debug agent" "debug agent" "$OUT"
 
 echo
 echo "== конфиг с провайдером и секретом =="
@@ -231,6 +233,23 @@ check "ссылка на загрузку дана" "python.org" "$ERR"
 check_absent "ошибка не про opencode" "opencode не найден" "$ERR"
 check_absent "бэкап не создан" "backup-" "$(ls -A "$T6")"
 check_absent "правила не скопированы" "AGENTS.md" "$(ls -A "$T6")"
+
+echo
+echo "== opencode ниже минимума =="
+T10="$(mktemp -d /tmp/harness-test10-XXXX)"
+T11="$(mktemp -d /tmp/harness-test11-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T3" "$T4" "$T5" "$T6" "$T7" "$T9" "$T10" "$T11"' EXIT
+mkdir -p "$T10"
+printf '#!/bin/sh\nprintf "opencode v2.0.0\\n"\n' > "$T11/opencode"
+chmod +x "$T11/opencode"
+
+ERR="$(env PATH="$T11:$(dirname "$(command -v python3)"):/usr/bin:/bin" \
+    OPENCODE_CONFIG_DIR="$T10" "$REPO_DIR/install.sh" 2>&1)" && RC=0 || RC=$?
+check_eq "старая версия валит установку" "1" "$RC"
+check "причина названа" "ниже минимума" "$ERR"
+check "пин назван" "2.3.0" "$ERR"
+check_absent "бэкап не создан" "backup-" "$(ls -A "$T10")"
+check_absent "правила не скопированы" "AGENTS.md" "$(ls -A "$T10")"
 
 echo
 printf 'итого: %d ok, %d провалено\n' "$PASS" "$FAIL"
