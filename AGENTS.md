@@ -139,9 +139,23 @@ in.
   narrow, so a global `deny` cannot be lifted by a project.
 - `/mcps` connects or disconnects for the current session only; it does not
   persist. Only the config files decide the default.
-- Current setup: `blender` is disabled globally and enabled only in
-  `WORKSPACE/BLENDER/DONUT` and `WORKSPACE/BLENDER/X-Wing`.
+- Which servers are configured is per machine and per project: never write your
+  own setup into these rules. Keep personal notes outside the harness markers in
+  your own `AGENTS.md`, and project servers in that project's `opencode.jsonc`.
 - Right after writing an `opencode.jsonc`, the first `opencode mcp list` can race
   the config reload and print `No MCP servers configured`. Re-run it, or
   `/reload`, before believing the result.
+
+## 13. Stay inside the session's working directory
+
+- Treat the directory the session started in as the only project. Do not walk up
+  to a parent directory or sideways into a sibling repository, even if it is a
+  checkout of the same project.
+- An empty or non-git working directory is not a reason to look for a better
+  repository: initialize it there, or stop and ask the user.
+- Everything outside the project — reads and writes — needs the user's approval.
+  The harness encodes this as `external_directory: ask`; do not work around it
+  by moving files with shell commands.
+- If a task looks like it belongs to another project, say so and wait for an
+  explicit instruction before touching anything there.
 <!-- harness:end -->

@@ -108,13 +108,15 @@ for gitcmd in 'git reset --hard' 'git checkout main' 'git rebase main' 'git merg
         bad "implementer: $gitcmd НЕ запрещён (было: $(permission_rule implementer shell "$gitcmd"))"
     fi
 done
-for gitcmd in 'git commit -m x' 'git push'; do
-    if [[ "$(permission_rule implementer shell "$gitcmd")" == "deny" ]]; then
-        bad "implementer: $gitcmd запрещён, а должен быть разрешён"
+for gitcmd in 'git commit -m x' 'git push' 'git tag v1.0.0'; do
+    if [[ "$(permission_rule implementer shell "$gitcmd")" == "ask" ]]; then
+        ok "implementer: $gitcmd требует подтверждения"
     else
-        ok "implementer: $gitcmd не запрещён"
+        bad "implementer: $gitcmd НЕ требует подтверждения (было: $(permission_rule implementer shell "$gitcmd"))"
     fi
 done
+check_eq "implementer: доступ вне проекта требует подтверждения" "ask" \
+    "$(permission_rule implementer external_directory '*')"
 check "reviewer: git diff разрешён" "allow" "$(permission_rule reviewer shell 'git diff')"
 
 echo

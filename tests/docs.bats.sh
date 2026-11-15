@@ -78,6 +78,8 @@ contains "README: opencode 2.3.0" "2.3.0" "README.md"
 contains "README: APPROVE не заменяет тесты" "APPROVE" "README.md"
 contains "README: команда /release" "/release" "README.md"
 contains "README: doctor" "tests/doctor.sh" "README.md"
+contains "README: тринадцать правил" "Тринадцать правил" "README.md"
+contains "README: граница проекта" "external_directory: ask" "README.md"
 
 if grep -q 'opencode debug skill\|opencode debug agent' "$REPO_DIR/README.md"; then
     printf '  FAIL README: остались команды opencode v1 (debug skill/agent)\n'

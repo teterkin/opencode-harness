@@ -22,8 +22,11 @@
   пишет.
 - **Ответственность за git.** Коммит, пуш, ребейз — только по прямой просьбе.
   `implementer` дополнительно не может переписывать историю: `reset`,
-  `checkout`, `rebase` и `merge` запрещены на уровне permissions, а не только
-  текстом.
+  `checkout`, `rebase` и `merge` запрещены на уровне permissions, а `commit`,
+  `push` и `tag` требуют подтверждения.
+- **Граница проекта.** Всё вне рабочего каталога сессии — чтение и запись —
+  требует подтверждения (`external_directory: ask`). Уйти в соседний
+  репозиторий или родительский каталог агент не может без твоего согласия.
 - **Разделение ролей.** Планировщик физически не может редактировать файлы:
   `edit: deny` у агента `plan`. Ревьюер не может ничего изменить вовсе и ходит
   в отдельную модель.
@@ -336,8 +339,8 @@ README и только на зелёных проверках ставит ан�
 6. **Git-операции только по явной просьбе.** `commit`, `push`, `reset`,
    `checkout`, `rebase`, `merge` запрещены без прямого указания в сообщении.
    `/release` считается таким указанием. В `implementer` `reset`, `checkout`,
-   `rebase` и `merge` запрещены ещё и на уровне permissions, а `commit` и
-   `push` остаются на одном слове.
+   `rebase` и `merge` запрещены на уровне permissions, а `commit`, `push` и
+   `tag` требуют подтверждения.
 7. **В начале задачи — git.** Рабочая папка проверяется на инициализированный
    репозиторий (`git rev-parse --is-inside-work-tree`). Если git не найден,
    агент сам делает `git init` (кроме `$HOME` и `/`) и говорит об этом одной
@@ -389,7 +392,7 @@ opencode debug config           # валидный JSON: источники ко
 
 | Файл в репозитории | Куда устанавливается | Роль |
 | --- | --- | --- |
-| `AGENTS.md` | `~/.config/opencode/AGENTS.md` | Двенадцать правил. Попадают в контекст каждой сессии: TDD, PRD перед фичей, план до правок, атомарные изменения, реальная проверка, git-дисциплина, SemVer, docs-baseline, каркас проектного `AGENTS.md`, язык, MCP-серверы (выключены глобально, включаются проектным `opencode.jsonc`) |
+| `AGENTS.md` | `~/.config/opencode/AGENTS.md` | Тринадцать правил. Попадают в контекст каждой сессии: TDD, PRD перед фичей, план до правок, атомарные изменения, реальная проверка, git-дисциплина, SemVer, docs-baseline, каркас проектного `AGENTS.md`, язык, MCP-серверы (выключены глобально, включаются проектным `opencode.jsonc`), граница рабочего каталога |
 | `skills/tdd-workflow/SKILL.md` | `~/.config/opencode/skill/tdd-workflow/` | Исходное состояние, строгий цикл red → green → refactor, проверка чувствительности теста, strict `xfail` |
 | `skills/prd-authoring/SKILL.md` | `~/.config/opencode/skill/prd-authoring/` | Шаблон PRD, источники и допущения, сохранение в `docs/prd/<slug>.md` |
 | `skills/project-kit/SKILL.md` | `~/.config/opencode/skill/project-kit/` | Docs-baseline, каркас проектного `AGENTS.md`, ветки и версии |
@@ -400,7 +403,7 @@ opencode debug config           # валидный JSON: источники ко
 | `commands/tdd.md` | `~/.config/opencode/command/tdd.md` | `/tdd <задача>` |
 | `commands/review.md` | `~/.config/opencode/command/review.md` | `/review` |
 | `commands/release.md` | `~/.config/opencode/command/release.md` | `/release` |
-| `opencode.json` | `~/.config/opencode/opencode.json` | Модель, `default_agent`, базовые permissions. Накладывается поверх существующего конфига |
+| `opencode.json` | `~/.config/opencode/opencode.json` | `default_agent`, базовые permissions, `external_directory: ask`. Накладывается поверх существующего конфига |
 
 ### Права: `permissions`-ruleset
 
@@ -410,8 +413,11 @@ opencode 2.x принимает `permissions` — упорядоченный с�
 разрешил глобальный конфиг, но не расширить.
 
 У `implementer` разрешены `edit` и `shell`, но `git reset*`, `git checkout*`,
-`git rebase*` и `git merge*` запрещены. У `plan` и `reviewer` запрещён `edit`.
-Это единственная часть харнесса, которая блокирует действие по-настоящему.
+`git rebase*` и `git merge*` запрещены, а `git commit*`, `git push*` и
+`git tag*` требуют подтверждения. У `plan` и `reviewer` запрещён `edit`.
+Действие `external_directory` в `ask` означает, что любой путь вне рабочего
+каталога сессии — и чтение, и запись — спрашивает разрешения. Это единственная
+часть харнесса, которая блокирует действие по-настоящему.
 
 ### Проектный уровень — действует только в репозитории
 
@@ -450,7 +456,8 @@ tests/run.sh             все проверки
 
 | Версия харнесса | opencode | Статус |
 | --- | --- | --- |
-| 2.2.0 | 2.3.0 | текущая |
+| 2.3.0 | 2.3.0 | текущая |
+| 2.2.0 | 2.3.0 | зафиксирована |
 | 2.1.0 | 2.3.0 | зафиксирована |
 | 2.0.1 | 2.3.0 | зафиксирована |
 | 2.0.0 | 2.3.0 | зафиксирована |

@@ -82,6 +82,10 @@ check "правило: MCP включается проектным конфиг�
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: MCP не через policies" "mcp.use" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check_absent "правила: нет личного сервера" "blender" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check_absent "правила: нет личных путей" "WORKSPACE/BLENDER" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: граница рабочего каталога" "Stay inside the session's working directory" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "model прописан" "opencode/big-pickle" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "default_agent прописан" "implementer" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "opencode.json: формат v2 (permissions)" '"permissions"' "$(cat "$FAKE_CONFIG/opencode.json")"

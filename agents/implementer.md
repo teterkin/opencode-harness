@@ -20,6 +20,15 @@ permissions:
   - action: shell
     resource: "git merge*"
     effect: deny
+  - action: shell
+    resource: "git commit*"
+    effect: ask
+  - action: shell
+    resource: "git push*"
+    effect: ask
+  - action: shell
+    resource: "git tag*"
+    effect: ask
 ---
 
 You implement changes the way a disciplined engineer would.
