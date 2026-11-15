@@ -58,11 +58,16 @@ For small, obvious, low-risk changes, skip the PRD and say so in one line.
 
 ## 6. Git discipline
 
-- At the start of any task, check the repository:
-  `git rev-parse --is-inside-work-tree`.
-- If the working directory is not a git repository, initialize it without
-  asking: `git init`, and say so in one line. Do not initialize `$HOME` or `/`,
-  and do not create commits there.
+- At the start of any task, find the repository root:
+  `git rev-parse --show-toplevel`. What matters is the root, not that some
+  repository happens to exist above you.
+- If the root is the working directory or below it, work in that repository. If
+  the root is a parent of the working directory — especially the home directory
+  or `/` — the project has no repository of its own: run `git init` here, say so
+  in one line, and never commit into the parent.
+- Never run `git add -A`, `git add .` or `git commit -a` in a repository whose
+  root is the home directory or `/`: those commands stage secrets such as
+  `.ssh/` and `.git-credentials`.
 - Never run `git commit`, `git push`, `git checkout`, `git reset`, `git rebase`,
   `git merge`, or history-rewriting commands unless the user explicitly asks.
   `/release` counts as asking.

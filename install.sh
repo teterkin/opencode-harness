@@ -53,6 +53,15 @@ else
     fail "opencode $OPENCODE_VERSION ниже минимума $min. Обнови opencode: https://opencode.ai/docs/#install"
 fi
 
+if command -v git >/dev/null 2>&1 && [[ -n "${HOME:-}" && -d "${HOME:-}" ]]; then
+    HOME_REAL="$(cd "$HOME" && pwd -P)"
+    HOME_ROOT="$(git -C "$HOME_REAL" rev-parse --show-toplevel 2>/dev/null || true)"
+    if [[ -n "$HOME_ROOT" && "$(cd "$HOME_ROOT" && pwd -P)" == "$HOME_REAL" ]]; then
+        printf 'предупреждение: %s — git-репозиторий. Проекты внутри него не получат собственный репозиторий, а git add -A затянет .ssh и .git-credentials. Проверь: git -C %s status --short\n' \
+            "$HOME" "$HOME" >&2
+    fi
+fi
+
 if [[ -f "$CONFIG_DIR/opencode.json" ]]; then
     python3 - "$CONFIG_DIR/opencode.json" <<'PY'
 import json

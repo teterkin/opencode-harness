@@ -59,9 +59,9 @@ check "скилл prd: docs/prd" "docs/prd/" "$(cat "$FAKE_CONFIG/skill/prd-auth
 check "скилл project-kit" "Documentation baseline" \
     "$(cat "$FAKE_CONFIG/skill/project-kit/SKILL.md" 2>&1)"
 check "команда release" "VERSION" "$(cat "$FAKE_CONFIG/command/release.md" 2>&1)"
-check "правило: проверка git на старте задачи" "git rev-parse --is-inside-work-tree" \
+check "правило: проверка git на старте задачи" "git rev-parse --show-toplevel" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
-check "правило: авто git init" "not a git repository, initialize it" \
+check "правило: авто git init" "run \`git init\` here" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: без спроса" '`git init`' "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: ветки" "feat/<slug>" "$(cat "$FAKE_CONFIG/AGENTS.md")"
@@ -86,6 +86,8 @@ check_absent "правила: нет личного сервера" "blender" "$
 check_absent "правила: нет личных путей" "WORKSPACE/BLENDER" "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: граница рабочего каталога" "Stay inside the session's working directory" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: корень репозитория" "--show-toplevel" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: домашний каталог — не проект" "home directory" "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "model прописан" "opencode/big-pickle" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "default_agent прописан" "implementer" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "opencode.json: формат v2 (permissions)" '"permissions"' "$(cat "$FAKE_CONFIG/opencode.json")"
@@ -233,6 +235,19 @@ check "dry-run: выбор модели сохранён" "opencode/deepseek-v4.
 OUT="$(OPENCODE_CONFIG_DIR="$T13/empty" "$REPO_DIR/install.sh" --nope 2>&1)" && RC=0 || RC=$?
 check_eq "неизвестный флаг: код 64" "64" "$RC"
 check "неизвестный флаг: подсказка" "--dry-run" "$OUT"
+
+echo
+echo "== домашний репозиторий =="
+T14="$(mktemp -d /tmp/harness-test14-XXXX)"
+T15="$(mktemp -d /tmp/harness-test15-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T4" "$T8" "$T12" "$T13" "$T14" "$T15"' EXIT
+mkdir -p "$T14/cfg" "$T15/cfg"
+git -C "$T14" init -q
+OUT="$(HOME="$T14" OPENCODE_CONFIG_DIR="$T14/cfg" "$REPO_DIR/install.sh" 2>&1)"
+check "предупреждение про домашний репозиторий" "git-репозиторий" "$OUT"
+check "совет назван" "git add -A" "$OUT"
+OUT="$(HOME="$T15" OPENCODE_CONFIG_DIR="$T15/cfg" "$REPO_DIR/install.sh" 2>&1)"
+check_absent "без домашнего репозитория предупреждения нет" "git-репозиторий" "$OUT"
 
 echo
 echo "== uninstall =="
