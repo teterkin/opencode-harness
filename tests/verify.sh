@@ -119,7 +119,7 @@ check "reviewer: git diff разрешён" "allow" "$(permission_rule reviewer 
 
 echo
 echo "== commands =="
-for cmd in prd tdd review; do
+for cmd in prd tdd review release; do
     if has_item "$COMMANDS" "$cmd"; then
         ok "команда /$cmd зарегистрирована"
     else

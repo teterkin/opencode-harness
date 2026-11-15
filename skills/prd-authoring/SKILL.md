@@ -28,6 +28,10 @@ knows the PRD was intentionally skipped.
 
 **Open questions** — anything that blocks or forks the implementation.
 
+**Sources and assumptions** — the files, docs and commands you actually read,
+and every assumption you had to make. An assumption you cannot verify goes
+under Open questions, not here.
+
 **Risks** — what could break, and the rollback plan.
 ```
 
@@ -36,6 +40,9 @@ knows the PRD was intentionally skipped.
 - Keep it short. One screen, not a document.
 - Acceptance criteria are testable statements, not aspirations.
 - Real unknowns go under Open questions instead of being guessed.
+- Sources and assumptions are filled from what you read, never invented. If you
+  did not open the file, do not list it.
 - Stop after writing it and wait for confirmation. Do not start implementing.
 - Do not silently add a requirement the user never agreed to.
-- Once confirmed, save it (e.g. `docs/prd/<slug>.md`) if the user wants it kept.
+- Once confirmed, save it to `docs/prd/<slug>.md` in the project and check the
+  result against its acceptance criteria one by one before reporting done.

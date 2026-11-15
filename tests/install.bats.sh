@@ -49,7 +49,16 @@ check "implementer установлен" "You implement changes" "$(cat "$FAKE_C
 check "reviewer установлен" "strict reviewer" "$(cat "$FAKE_CONFIG/agent/reviewer.md" 2>&1)"
 check "команда prd" "Write a PRD for the following" "$(cat "$FAKE_CONFIG/command/prd.md" 2>&1)"
 check "скилл tdd-workflow" "TDD workflow" "$(cat "$FAKE_CONFIG/skill/tdd-workflow/SKILL.md" 2>&1)"
+check "скилл tdd: исходное состояние" "Precondition" "$(cat "$FAKE_CONFIG/skill/tdd-workflow/SKILL.md" 2>&1)"
+check "скилл tdd: чувствительность" "Sensitivity check" "$(cat "$FAKE_CONFIG/skill/tdd-workflow/SKILL.md" 2>&1)"
+check "скилл tdd: известный дефект" "xfail" "$(cat "$FAKE_CONFIG/skill/tdd-workflow/SKILL.md" 2>&1)"
 check "скилл prd-authoring" "PRD first" "$(cat "$FAKE_CONFIG/skill/prd-authoring/SKILL.md" 2>&1)"
+check "скилл prd: источники и допущения" "Sources and assumptions" \
+    "$(cat "$FAKE_CONFIG/skill/prd-authoring/SKILL.md" 2>&1)"
+check "скилл prd: docs/prd" "docs/prd/" "$(cat "$FAKE_CONFIG/skill/prd-authoring/SKILL.md" 2>&1)"
+check "скилл project-kit" "Documentation baseline" \
+    "$(cat "$FAKE_CONFIG/skill/project-kit/SKILL.md" 2>&1)"
+check "команда release" "VERSION" "$(cat "$FAKE_CONFIG/command/release.md" 2>&1)"
 check "правило: проверка git на старте задачи" "git rev-parse --is-inside-work-tree" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: авто git init" "not a git repository, initialize it" \
