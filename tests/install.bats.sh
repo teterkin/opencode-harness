@@ -95,6 +95,20 @@ check_absent "в подсказках нет opencode debug skill" "debug skill"
 check_absent "в подсказках нет opencode debug agent" "debug agent" "$OUT"
 
 echo
+echo "== шаблон конфига =="
+TEMPLATE_KEYS="$(python3 - "$REPO_DIR/opencode.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    config = json.load(handle)
+print(",".join(key for key in ("model", "default_agent") if key in config))
+PY
+)"
+check_eq "шаблон не задаёт model и default_agent" "" "$TEMPLATE_KEYS"
+check "шаблон задаёт permissions" '"permissions"' "$(cat "$REPO_DIR/opencode.json")"
+
+echo
 echo "== конфиг с провайдером и секретом =="
 T2="$(mktemp -d /tmp/harness-test2-XXXX)"
 trap 'rm -rf "$FAKE_CONFIG" "$T2"' EXIT
@@ -120,8 +134,9 @@ RESULT="$(cat "$T2/opencode.json")"
 check "секрет провайдера сохранён" "sk-SECRET-KEEP-ME" "$RESULT"
 check "второй провайдер сохранён" "lmstudio" "$RESULT"
 check "mcp-конфиг сохранён" "playwright" "$RESULT"
-check "model переопределён харнесом" "opencode/big-pickle" "$RESULT"
-check_absent "чужой model не остался" "some/other-model" "$RESULT"
+check "пользовательский model сохранён" "some/other-model" "$RESULT"
+check_absent "дефолт харнесса не перетёр выбор модели" "opencode/big-pickle" "$RESULT"
+check "default_agent по умолчанию" '"default_agent": "implementer"' "$RESULT"
 check_eq "JSON валиден" "" "$(python3 -c "import json,sys; json.load(open('$T2/opencode.json'))" 2>&1)"
 
 check "прежнее правило в бэкапе" "прежнее правило" \

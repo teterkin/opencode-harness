@@ -163,6 +163,10 @@ except json.JSONDecodeError as error:
 # the harness owns are overwritten.
 merged = deep_merge(existing, harness)
 
+DEFAULTS = {"model": "opencode/big-pickle", "default_agent": "implementer"}
+for key, value in DEFAULTS.items():
+    merged.setdefault(key, value)
+
 with open(target_path, "w") as handle:
     json.dump(merged, handle, indent=2, ensure_ascii=False)
     handle.write("\n")
