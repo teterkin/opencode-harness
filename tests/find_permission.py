@@ -1,14 +1,22 @@
+import fnmatch
 import json
 import sys
 
-agent = json.load(sys.stdin)
-tool, pattern = sys.argv[1], sys.argv[2]
+agent_id, action, resource = sys.argv[1], sys.argv[2], sys.argv[3]
 
-# Правила применяются по порядку, последнее совпадение побеждает:
-# агент может сузить то, что глобальный конфиг разрешил, но не наоборот.
-action = "absent"
-for rule in agent.get("permission", []):
-    if rule.get("permission") == tool and rule.get("pattern") == pattern:
-        action = rule.get("action")
+agents = json.load(sys.stdin)["data"]
+agent = next((item for item in agents if item["id"] == agent_id), None)
+if agent is None:
+    print("absent")
+    raise SystemExit(0)
 
-print(action)
+# Rules are ordered, the last matching rule wins: an agent can narrow what the
+# global config allowed, but not widen it.
+effect = "absent"
+for rule in agent.get("permissions", []):
+    if fnmatch.fnmatch(action, rule["action"]) and fnmatch.fnmatch(
+        resource, rule["resource"]
+    ):
+        effect = rule["effect"]
+
+print(effect)
