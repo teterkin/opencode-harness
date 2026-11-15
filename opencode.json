@@ -2,8 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
   "default_agent": "implementer",
-  "permission": {
-    "edit": "allow",
-    "read": "allow"
-  }
+  "permissions": [
+    { "action": "edit", "resource": "*", "effect": "allow" },
+    { "action": "read", "resource": "*", "effect": "allow" }
+  ]
 }

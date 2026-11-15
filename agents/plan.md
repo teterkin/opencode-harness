@@ -1,13 +1,22 @@
 ---
 description: Planning agent. Writes a PRD or implementation plan and waits for confirmation. Never edits code.
 mode: primary
-permission:
-  edit: deny
-  bash:
-    "*": ask
-    "git diff*": allow
-    "git status*": allow
-    "git log*": allow
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: ask
+  - action: shell
+    resource: "git diff*"
+    effect: allow
+  - action: shell
+    resource: "git status*"
+    effect: allow
+  - action: shell
+    resource: "git log*"
+    effect: allow
 ---
 
 You plan; you do not implement.

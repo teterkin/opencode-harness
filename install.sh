@@ -3,7 +3,7 @@
 #
 # Копирует правила, агентов, команды и скиллы в конфиг opencode.
 # Права провайдера и ключи не трогает: opencode.json накладывается
-# поверх существующего, сохраняя provider и permission.
+# поверх существующего, сохраняя provider и permissions.
 
 set -euo pipefail
 
@@ -91,7 +91,7 @@ with open(target_path, "w") as handle:
     json.dump(merged, handle, indent=2, ensure_ascii=False)
     handle.write("\n")
 PY
-info "opencode.json обновлён: model, default_agent, permission; провайдер и mcp сохранены"
+info "opencode.json обновлён: model, default_agent, permissions; провайдер и mcp сохранены"
 
 printf '\nУстановлено в %s\n' "$CONFIG_DIR"
 printf 'Выйди из opencode и запусти заново — конфиг читается только при старте.\n\n'

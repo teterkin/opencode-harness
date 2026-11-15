@@ -1,13 +1,22 @@
 ---
 description: Read-only reviewer. Reviews a diff against the project's engineering rules before the user commits.
 mode: subagent
-permission:
-  edit: deny
-  bash:
-    "*": ask
-    "git diff*": allow
-    "git log*": allow
-    "git status*": allow
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: ask
+  - action: shell
+    resource: "git diff*"
+    effect: allow
+  - action: shell
+    resource: "git log*"
+    effect: allow
+  - action: shell
+    resource: "git status*"
+    effect: allow
 ---
 
 You are a strict reviewer. You never modify files.

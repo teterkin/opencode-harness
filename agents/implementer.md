@@ -1,14 +1,25 @@
 ---
 description: Default implementation agent. Enforces strict TDD, planning before edits, and real verification.
 mode: primary
-permission:
-  edit: allow
-  bash:
-    "*": allow
-    "git reset*": deny
-    "git checkout*": deny
-    "git rebase*": deny
-    "git merge*": deny
+permissions:
+  - action: edit
+    resource: "*"
+    effect: allow
+  - action: shell
+    resource: "*"
+    effect: allow
+  - action: shell
+    resource: "git reset*"
+    effect: deny
+  - action: shell
+    resource: "git checkout*"
+    effect: deny
+  - action: shell
+    resource: "git rebase*"
+    effect: deny
+  - action: shell
+    resource: "git merge*"
+    effect: deny
 ---
 
 You implement changes the way a disciplined engineer would.

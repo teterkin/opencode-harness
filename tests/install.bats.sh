@@ -56,6 +56,11 @@ check "правило: напоминание про git" "work is always done i
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "model прописан" "opencode/big-pickle" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "default_agent прописан" "implementer" "$(cat "$FAKE_CONFIG/opencode.json")"
+check "opencode.json: формат v2 (permissions)" '"permissions"' "$(cat "$FAKE_CONFIG/opencode.json")"
+check_absent "opencode.json: нет deprecated permission" '"permission":' "$(cat "$FAKE_CONFIG/opencode.json")"
+check "implementer: формат v2 (permissions)" "permissions:" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
+check_absent "implementer: нет deprecated permission" "permission:" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
+check "implementer: git merge запрещён" "git merge*" "$(cat "$FAKE_CONFIG/agent/implementer.md")"
 
 echo
 echo "== конфиг с провайдером и секретом =="
