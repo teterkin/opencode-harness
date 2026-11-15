@@ -52,8 +52,19 @@ check "скилл tdd-workflow" "TDD workflow" "$(cat "$FAKE_CONFIG/skill/tdd-wo
 check "скилл prd-authoring" "PRD first" "$(cat "$FAKE_CONFIG/skill/prd-authoring/SKILL.md" 2>&1)"
 check "правило: проверка git на старте задачи" "git rev-parse --is-inside-work-tree" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
-check "правило: напоминание про git" "work is always done in git" \
+check "правило: авто git init" "not a git repository, initialize it" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: без спроса" '`git init`' "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: ветки" "feat/<slug>" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: SemVer" "MAJOR.MINOR.PATCH" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: CHANGELOG в релизе" "CHANGELOG.md" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: docs baseline" "docs/prd/<slug>.md" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: каркас проектного AGENTS.md" "required core" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: проверки проекта" "typecheck" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: язык общения" "Reply in the language the user writes in" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: doctor" "tests/doctor.sh" "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "model прописан" "opencode/big-pickle" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "default_agent прописан" "implementer" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "opencode.json: формат v2 (permissions)" '"permissions"' "$(cat "$FAKE_CONFIG/opencode.json")"

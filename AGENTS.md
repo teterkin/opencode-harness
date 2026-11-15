@@ -22,9 +22,11 @@ For any non-trivial feature or behavior change (more than a couple of files, or
 anything with unclear requirements):
 
 1. Write a short PRD first: goal, non-goals, user story, acceptance criteria,
-   open questions, risks.
+   open questions, risks, and the sources you actually read.
 2. Stop and let the user confirm it before writing code.
 3. Do not silently implement a requirement the user never agreed to.
+4. Save the confirmed PRD to `docs/prd/<slug>.md` and check the result against
+   its acceptance criteria one by one.
 
 For small, obvious, low-risk changes, skip the PRD and say so in one line.
 
@@ -45,19 +47,26 @@ For small, obvious, low-risk changes, skip the PRD and say so in one line.
 
 ## 5. Verify and self-review
 
-After every non-trivial change, run the project's real checks (lint, typecheck,
-tests) — find the actual commands, do not invent them. Then report:
-what was changed, what was run, what the output was, what remains unverified.
-If a check cannot be run, say so explicitly instead of implying success.
+- Run the project's real checks (lint, typecheck, tests), found in package
+  scripts, Makefile or CI config. Never invent a command.
+- If the repository has `tests/doctor.sh`, run it first. Exit code 2 means the
+  running tool version differs from the tested one: the harness is unverified
+  and the self-tests must run.
+- Then report: what changed, what you ran, the actual output, and what remains
+  unverified. A check that could not run is stated, not implied as green.
 
 ## 6. Git discipline
 
-- At the start of any task, check that the working directory is an initialized
-  git repository (`git rev-parse --is-inside-work-tree`). If it is not, remind
-  the user once per session that in real projects work is always done in git
-  and offer to run `git init`.
+- At the start of any task, check the repository:
+  `git rev-parse --is-inside-work-tree`.
+- If the working directory is not a git repository, initialize it without
+  asking: `git init`, and say so in one line. Do not initialize `$HOME` or `/`,
+  and do not create commits there.
 - Never run `git commit`, `git push`, `git checkout`, `git reset`, `git rebase`,
   `git merge`, or history-rewriting commands unless the user explicitly asks.
+  `/release` counts as asking.
+- Trunk is `main`; work lives in `feat/<slug>`, `fix/<slug>`, `docs/<slug>` or
+  `chore/<slug>`.
 - Never commit secrets, credentials, or `.env`-style files.
 - Keep the working tree changes reviewable; do not stage everything blindly.
 
@@ -76,3 +85,41 @@ If a check cannot be run, say so explicitly instead of implying success.
   output reported. A rebuild must never silently pick up new versions.
 - Base images and external sources are pinned too: image tag (or digest),
   and `git clone` by commit SHA with an explicit ref.
+
+## 8. Releases use SemVer
+
+- A version is `MAJOR.MINOR.PATCH` and lives in exactly three places that must
+  agree: `VERSION`, the top entry of `CHANGELOG.md`, and the `vX.Y.Z` tag.
+- MAJOR: rules, permissions, agent/command/skill names or the minimum tool
+  version change incompatibly. MINOR: a new agent, command, skill or rule that
+  stays compatible. PATCH: wording, docs, bug fixes without behavior change.
+- Release order: bump `VERSION`, write the `CHANGELOG.md` entry, run the real
+  checks, tag. Never tag with red checks.
+
+## 9. Docs travel with the work
+
+- A project with a PRD also has: `LICENSE`, `README.md`, `CHANGELOG.md`,
+  `TODO.md`, `AGENTS.md`, and confirmed PRDs in `docs/prd/`.
+- README order: description, install, usage with examples, architecture,
+  versions and releases. Ask which license to use; MIT is the default.
+- Docs change in the same diff as the behavior. A stale README is a bug, not a
+  backlog item.
+
+## 10. Project AGENTS.md has a required core
+
+Every project's `AGENTS.md` states, exactly and only if true:
+
+- commands: test, lint, typecheck, build, run;
+- branching and commit conventions;
+- project map, and the quirks of each unusual object or module;
+- domain invariants that are not visible in the code;
+- secrets policy.
+
+If the file is missing or a section is absent, say so once and offer to fill it
+in.
+
+## 11. Language
+
+- Reply in the language the user writes in: Russian for this user.
+- Keep rules, skills and agent prompts in English.
+- User-facing docs follow the language of the project's README.
