@@ -123,3 +123,23 @@ in.
 - Reply in the language the user writes in: Russian for this user.
 - Keep rules, skills and agent prompts in English.
 - User-facing docs follow the language of the project's README.
+
+## 12. MCP servers default to off, enable per project
+
+- Keep a heavyweight MCP server in the global
+  `~/.config/opencode/opencode.json` with `"disabled": true`. It stays
+  configured but never connects on its own.
+- Enable it where it is actually used by adding `opencode.jsonc` to that project
+  with the full server object and `"disabled": false`.
+- A project config replaces the whole server object, so repeat every required
+  field (`type`, `command` / `url`, `environment`). A partial object silently
+  leaves the server unconfigured.
+- Never use `policies` with `mcp.use` for this: broad configuration outranks
+  narrow, so a global `deny` cannot be lifted by a project.
+- `/mcps` connects or disconnects for the current session only; it does not
+  persist. Only the config files decide the default.
+- Current setup: `blender` is disabled globally and enabled only in
+  `WORKSPACE/BLENDER/DONUT` and `WORKSPACE/BLENDER/X-Wing`.
+- Right after writing an `opencode.jsonc`, the first `opencode mcp list` can race
+  the config reload and print `No MCP servers configured`. Re-run it, or
+  `/reload`, before believing the result.

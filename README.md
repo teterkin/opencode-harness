@@ -369,7 +369,7 @@ opencode debug config           # валидный JSON: источники ко
 
 | Файл в репозитории | Куда устанавливается | Роль |
 | --- | --- | --- |
-| `AGENTS.md` | `~/.config/opencode/AGENTS.md` | Одиннадцать правил. Попадают в контекст каждой сессии: TDD, PRD перед фичей, план до правок, атомарные изменения, реальная проверка, git-дисциплина, SemVer, docs-baseline, каркас проектного `AGENTS.md`, язык |
+| `AGENTS.md` | `~/.config/opencode/AGENTS.md` | Двенадцать правил. Попадают в контекст каждой сессии: TDD, PRD перед фичей, план до правок, атомарные изменения, реальная проверка, git-дисциплина, SemVer, docs-baseline, каркас проектного `AGENTS.md`, язык, MCP-серверы (выключены глобально, включаются проектным `opencode.jsonc`) |
 | `skills/tdd-workflow/SKILL.md` | `~/.config/opencode/skill/tdd-workflow/` | Исходное состояние, строгий цикл red → green → refactor, проверка чувствительности теста, strict `xfail` |
 | `skills/prd-authoring/SKILL.md` | `~/.config/opencode/skill/prd-authoring/` | Шаблон PRD, источники и допущения, сохранение в `docs/prd/<slug>.md` |
 | `skills/project-kit/SKILL.md` | `~/.config/opencode/skill/project-kit/` | Docs-baseline, каркас проектного `AGENTS.md`, ветки и версии |

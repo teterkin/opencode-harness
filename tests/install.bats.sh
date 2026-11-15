@@ -74,6 +74,14 @@ check "правило: проверки проекта" "typecheck" "$(cat "$FAK
 check "правило: язык общения" "Reply in the language the user writes in" \
     "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "правило: doctor" "tests/doctor.sh" "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: MCP по умолчанию выключен" "MCP servers default to off" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: MCP disabled в глобальном конфиге" '"disabled": true' \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: MCP включается проектным конфигом" "opencode.jsonc" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
+check "правило: MCP не через policies" "mcp.use" \
+    "$(cat "$FAKE_CONFIG/AGENTS.md")"
 check "model прописан" "opencode/big-pickle" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "default_agent прописан" "implementer" "$(cat "$FAKE_CONFIG/opencode.json")"
 check "opencode.json: формат v2 (permissions)" '"permissions"' "$(cat "$FAKE_CONFIG/opencode.json")"

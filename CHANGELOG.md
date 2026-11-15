@@ -30,7 +30,8 @@
   манифесту, с fallback на список файлов 1.0.0.
 - `AGENTS.md`: правила про авто `git init`, ветки `feat/` `fix/` `docs/`
   `chore/`, SemVer, docs-baseline, обязательный каркас проектного `AGENTS.md`,
-  язык общения и `doctor`.
+  язык общения, `doctor` и MCP-серверы: выключены глобально, включаются
+  проектным `opencode.jsonc`.
 
 ### Changed
 
