@@ -86,5 +86,23 @@ check "версия распознана" "1.4.3" "$OUT"
 check "причина названа" "ниже минимума" "$OUT"
 
 echo
+echo "== сломанный python3 =="
+BIN_E="$(fake_opencode "$TMP/e" 2.3.0)"
+mkdir -p "$TMP/nopy"
+printf '#!/bin/sh\nexit 1\n' > "$TMP/nopy/python3"
+chmod +x "$TMP/nopy/python3"
+OUT="$(env PATH="$TMP/nopy:$BIN_E:/usr/bin:/bin" \
+    "$REPO_DIR/tests/doctor.sh" --no-tests 2>&1)" && RC=0 || RC=$?
+check_eq "код 3 (не смог сравнить)" "3" "$RC"
+check "причина названа" "python3" "$OUT"
+if [[ "$OUT" == *"ok: версия совпадает"* ]]; then
+    printf '  FAIL ложное ok при сломанном python3\n'
+    FAIL=$((FAIL + 1))
+else
+    printf '  ok   без ложного ok\n'
+    PASS=$((PASS + 1))
+fi
+
+echo
 printf 'итого: %d ok, %d провалено\n' "$PASS" "$FAIL"
 [[ "$FAIL" -eq 0 ]]

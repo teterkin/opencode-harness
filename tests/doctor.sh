@@ -31,6 +31,13 @@ fi
 # shellcheck disable=SC1090
 . "$PIN_FILE"
 
+PYTHON="$(command -v python3 2>/dev/null || true)"
+if [[ -z "$PYTHON" ]] || ! "$PYTHON" -c 'pass' >/dev/null 2>&1; then
+    printf 'ошибка: python3 не найден или не запускается (%s) — без него doctor не сравнит версии\n' \
+        "${PYTHON:-нет в PATH}" >&2
+    exit 3
+fi
+
 version_of() {
     "$1" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
 }
