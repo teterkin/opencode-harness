@@ -34,15 +34,57 @@ remove_path() {
     fi
 }
 
+remove_agents_rule() {
+    local path="$CONFIG_DIR/AGENTS.md"
+    [[ -f "$path" ]] || return 0
+    python3 - "$path" <<'PY'
+import os
+import sys
+
+BEGIN = "<!-- harness:begin -->"
+END = "<!-- harness:end -->"
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    text = handle.read()
+
+start = text.find(BEGIN)
+end = text.find(END, start) + len(END) if start != -1 else -1
+if start == -1 or end == -1:
+    raise SystemExit(2)
+
+rest = (text[:start] + text[end:]).strip()
+if not rest:
+    os.remove(path)
+else:
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(rest + "\n")
+PY
+    if [[ -f "$path" ]]; then
+        info "правила харнесса убраны из AGENTS.md, твой текст сохранён"
+    else
+        info "удалён AGENTS.md"
+    fi
+    removed=$((removed + 1))
+}
+
+remove_agents_or_path() {
+    remove_agents_rule || remove_path "AGENTS.md"
+}
+
 if [[ -f "$MANIFEST" ]]; then
     while IFS= read -r rel; do
-        remove_path "$rel"
+        if [[ "$rel" == "AGENTS.md" ]]; then
+            remove_agents_or_path
+        else
+            remove_path "$rel"
+        fi
     done < "$MANIFEST"
     rm -f "$MANIFEST"
     info "манифест установки удалён"
 else
     # 1.0.0 ставился без манифеста: убираем известный набор файлов.
-    remove_path "AGENTS.md"
+    remove_agents_or_path
     for name in implementer plan reviewer; do
         remove_path "agent/$name.md"
     done

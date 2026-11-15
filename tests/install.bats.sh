@@ -128,7 +128,9 @@ check "прежнее правило в бэкапе" "прежнее прави
     "$(cat "$T2"/backup-*/AGENTS.md 2>&1)"
 check "прежний opencode.json в бэкапе" "sk-SECRET-KEEP-ME" \
     "$(cat "$T2"/backup-*/opencode.json 2>&1)"
-check "прежнее правило перезаписано" "TDD is mandatory" "$(cat "$T2/AGENTS.md")"
+check "прежнее правило сохранено" "прежнее правило" "$(cat "$T2/AGENTS.md")"
+check "правила харнесса добавлены" "TDD is mandatory" "$(cat "$T2/AGENTS.md")"
+check_eq "блок харнесса один" "1" "$(grep -c 'harness:begin' "$T2/AGENTS.md")"
 
 echo
 echo "== идемпотентность =="
@@ -137,6 +139,25 @@ OPENCODE_CONFIG_DIR="$T2" "$REPO_DIR/install.sh" >/dev/null
 check_eq "повторный запуск не ломает JSON" "" \
     "$(python3 -c "import json; json.load(open('$T2/opencode.json'))" 2>&1)"
 check "секрет пережил три запуска" "sk-SECRET-KEEP-ME" "$(cat "$T2/opencode.json")"
+check_eq "блок харнесса не дублируется" "1" "$(grep -c 'harness:begin' "$T2/AGENTS.md")"
+check "правка пользователя пережила повторные прогоны" "прежнее правило" "$(cat "$T2/AGENTS.md")"
+
+echo
+echo "== миграция AGENTS.md без маркеров =="
+T12="$(mktemp -d /tmp/harness-test12-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T4" "$T8" "$T12"' EXIT
+mkdir -p "$T12"
+python3 - "$REPO_DIR/AGENTS.md" "$T12/AGENTS.md" <<'PY'
+import sys
+
+text = open(sys.argv[1], encoding="utf-8").read()
+text = text.replace("<!-- harness:begin -->\n", "", 1)
+text = text.replace("<!-- harness:end -->\n", "", 1)
+open(sys.argv[2], "w", encoding="utf-8").write(text)
+PY
+OPENCODE_CONFIG_DIR="$T12" "$REPO_DIR/install.sh" >/dev/null
+check_eq "старый файл получил ровно один блок" "1" "$(grep -c 'harness:begin' "$T12/AGENTS.md")"
+check_eq "правила не задвоились" "1" "$(grep -c 'TDD is mandatory' "$T12/AGENTS.md")"
 
 echo
 echo "== uninstall =="
@@ -155,10 +176,13 @@ echo "мои заметки" > "$T4/mynotes.md"
 OPENCODE_CONFIG_DIR="$T4" "$REPO_DIR/install.sh" >/dev/null
 check "перед сносом правила есть" "$T4/AGENTS.md" "$(find "$T4" -maxdepth 1 -name AGENTS.md)"
 check "перед сносом провайдер цел" "sk-SECRET-KEEP-ME" "$(cat "$T4/opencode.json")"
+printf '\nмое правило\n' >> "$T4/AGENTS.md"
 
 OPENCODE_CONFIG_DIR="$T4" "$REPO_DIR/uninstall.sh" >/dev/null
 
-check_absent "правила убраны" "$T4/AGENTS.md" "$(find "$T4" -maxdepth 1 -name AGENTS.md)"
+check "пользовательский текст пережил снос" "мое правило" "$(cat "$T4/AGENTS.md" 2>&1)"
+check_absent "правила харнесса убраны" "TDD is mandatory" "$(cat "$T4/AGENTS.md" 2>&1)"
+check_absent "маркеры харнесса убраны" "harness:begin" "$(cat "$T4/AGENTS.md" 2>&1)"
 check_absent "implementer убран" "implementer.md" "$(find "$T4/agent" -name 'implementer.md' 2>&1)"
 check_absent "скилл убран" "tdd-workflow" "$(find "$T4/skill" -maxdepth 1 -name 'tdd-workflow' 2>&1)"
 check "чужой файл не тронут" "мои заметки" "$(cat "$T4/mynotes.md" 2>&1)"
@@ -185,6 +209,7 @@ check "новый скилл в манифесте" "skill/extra-skill" "$(cat "
 OPENCODE_CONFIG_DIR="$T8/cfg" "$T8/repo/uninstall.sh" >/dev/null
 check_absent "новый скилл снесён" "extra-skill" "$(ls "$T8/cfg/skill" 2>&1)"
 check_absent "агент снесён" "implementer.md" "$(ls "$T8/cfg/agent" 2>&1)"
+check_absent "AGENTS.md удалён, если в нём только харнесс" "AGENTS.md" "$(ls -A "$T8/cfg" 2>&1)"
 check_absent "манифест удалён" "harness-installed" "$(ls -A "$T8/cfg" 2>&1)"
 
 echo

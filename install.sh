@@ -70,7 +70,47 @@ MANIFEST="$CONFIG_DIR/harness-installed.txt"
 : > "$MANIFEST"
 record() { printf '%s\n' "$1" >> "$MANIFEST"; }
 
-cp "$REPO_DIR/AGENTS.md" "$CONFIG_DIR/AGENTS.md"
+merge_agents_md() {
+    python3 - "$REPO_DIR/AGENTS.md" "$CONFIG_DIR/AGENTS.md" <<'PY'
+import sys
+
+BEGIN = "<!-- harness:begin -->"
+END = "<!-- harness:end -->"
+
+source_path, target_path = sys.argv[1], sys.argv[2]
+with open(source_path, encoding="utf-8") as handle:
+    source = handle.read()
+
+start = source.index(BEGIN)
+end = source.index(END, start) + len(END)
+block = source[start:end].rstrip("\n") + "\n"
+
+try:
+    with open(target_path, encoding="utf-8") as handle:
+        existing = handle.read()
+except FileNotFoundError:
+    existing = ""
+
+if not existing.strip():
+    merged = block
+elif BEGIN in existing and END in existing:
+    old_start = existing.index(BEGIN)
+    old_end = existing.index(END, old_start) + len(END)
+    rest = existing[old_end:].lstrip("\n")
+    merged = existing[:old_start] + block + ("\n" + rest if rest else "")
+else:
+    without_markers = source.replace(BEGIN + "\n", "", 1).replace(END + "\n", "")
+    if existing.strip() == without_markers.strip():
+        merged = block
+    else:
+        merged = block + "\n" + existing.lstrip("\n")
+
+with open(target_path, "w", encoding="utf-8") as handle:
+    handle.write(merged)
+PY
+}
+
+merge_agents_md
 record "AGENTS.md"
 for file in "$REPO_DIR"/agents/*.md; do
     name="$(basename "$file")"

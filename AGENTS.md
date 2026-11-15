@@ -1,3 +1,4 @@
+<!-- harness:begin -->
 # Global engineering rules
 
 These rules apply to every session. They are non-negotiable unless the user
@@ -143,3 +144,4 @@ in.
 - Right after writing an `opencode.jsonc`, the first `opencode mcp list` can race
   the config reload and print `No MCP servers configured`. Re-run it, or
   `/reload`, before believing the result.
+<!-- harness:end -->
