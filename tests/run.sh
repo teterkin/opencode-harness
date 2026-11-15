@@ -5,7 +5,15 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-printf '== install / uninstall ==\n'
+printf '== окружение ==\n'
+bash "$SCRIPT_DIR/doctor.sh" --no-tests
+ENV_RC=$?
+
+printf '\n== doctor ==\n'
+bash "$SCRIPT_DIR/doctor.bats.sh"
+DOCTOR_RC=$?
+
+printf '\n== install / uninstall ==\n'
 bash "$SCRIPT_DIR/install.bats.sh"
 INSTALL_RC=$?
 
@@ -13,8 +21,10 @@ printf '\n== настройка opencode ==\n'
 bash "$SCRIPT_DIR/verify.sh"
 VERIFY_RC=$?
 
-printf '\nустановка: %s, настройка: %s\n' \
-    "$([[ "$INSTALL_RC" -eq 0 ]] && echo ok || echo FAIL)" \
-    "$([[ "$VERIFY_RC" -eq 0 ]] && echo ok || echo FAIL)"
+status() { [[ "$1" -eq 0 ]] && echo ok || echo FAIL; }
 
-[[ "$INSTALL_RC" -eq 0 && "$VERIFY_RC" -eq 0 ]]
+printf '\nокружение: %s, doctor: %s, установка: %s, настройка: %s\n' \
+    "$(status "$ENV_RC")" "$(status "$DOCTOR_RC")" \
+    "$(status "$INSTALL_RC")" "$(status "$VERIFY_RC")"
+
+[[ "$ENV_RC" -eq 0 && "$DOCTOR_RC" -eq 0 && "$INSTALL_RC" -eq 0 && "$VERIFY_RC" -eq 0 ]]
