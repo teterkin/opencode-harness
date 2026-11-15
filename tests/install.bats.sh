@@ -140,6 +140,34 @@ check_eq "повторный снос не падает" "0" \
     "$(OPENCODE_CONFIG_DIR="$T4" "$REPO_DIR/uninstall.sh" >/dev/null 2>&1; echo $?)"
 
 echo
+echo "== манифест: снос того, что появилось после 1.0 =="
+T8="$(mktemp -d /tmp/harness-test8-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T4" "$T8"' EXIT
+cp -R "$REPO_DIR" "$T8/repo"
+mkdir -p "$T8/repo/skills/extra-skill"
+printf -- '---\nname: extra-skill\ndescription: probe\n---\n\nprobe\n' \
+    > "$T8/repo/skills/extra-skill/SKILL.md"
+
+OPENCODE_CONFIG_DIR="$T8/cfg" "$T8/repo/install.sh" >/dev/null
+check "манифест создан" "harness-installed.txt" "$(ls "$T8/cfg" 2>&1)"
+check "новый скилл в манифесте" "skill/extra-skill" "$(cat "$T8/cfg/harness-installed.txt" 2>&1)"
+
+OPENCODE_CONFIG_DIR="$T8/cfg" "$T8/repo/uninstall.sh" >/dev/null
+check_absent "новый скилл снесён" "extra-skill" "$(ls "$T8/cfg/skill" 2>&1)"
+check_absent "агент снесён" "implementer.md" "$(ls "$T8/cfg/agent" 2>&1)"
+check_absent "манифест удалён" "harness-installed" "$(ls -A "$T8/cfg" 2>&1)"
+
+echo
+echo "== снос установки 1.0, когда манифеста нет =="
+T9="$(mktemp -d /tmp/harness-test9-XXXX)"
+trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T4" "$T8" "$T9"' EXIT
+OPENCODE_CONFIG_DIR="$T9/cfg" "$REPO_DIR/install.sh" >/dev/null
+rm -f "$T9/cfg/harness-installed.txt"
+OPENCODE_CONFIG_DIR="$T9/cfg" "$REPO_DIR/uninstall.sh" >/dev/null
+check_absent "агент снесён по старому списку" "implementer.md" "$(ls "$T9/cfg/agent" 2>&1)"
+check_absent "скилл снесён по старому списку" "tdd-workflow" "$(ls "$T9/cfg/skill" 2>&1)"
+
+echo
 echo "== битый вход =="
 T3="$(mktemp -d /tmp/harness-test3-XXXX)"
 trap 'rm -rf "$FAKE_CONFIG" "$T2" "$T3"' EXIT

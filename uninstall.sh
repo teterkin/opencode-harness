@@ -2,46 +2,57 @@
 # Удалить харнесс из ~/.config/opencode.
 #
 # Оставляет на месте opencode.json, provider, mcp и всё, чем ты
-# пользовался до установки. Удаляет только файлы харнесса.
-# Бэкапы (backup-*) не трогает.
+# пользовался до установки. Удаляет только то, что перечислено в манифесте
+# установки. Бэкапы (backup-*) не трогает.
 
 set -euo pipefail
 
 CONFIG_DIR="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
+MANIFEST="$CONFIG_DIR/harness-installed.txt"
 
 info() { printf '  %s\n' "$1"; }
 
 removed=0
 
-if [[ -f "$CONFIG_DIR/AGENTS.md" ]]; then
-    rm -f "$CONFIG_DIR/AGENTS.md"
-    info "удалён AGENTS.md"
-    removed=$((removed + 1))
+remove_path() {
+    local rel="$1"
+    [[ -n "$rel" ]] || return 0
+    case "$rel" in
+        /* | *..*)
+            info "пропущен подозрительный путь: $rel"
+            return 0
+            ;;
+    esac
+    if [[ -d "$CONFIG_DIR/$rel" ]]; then
+        rm -rf "${CONFIG_DIR:?}/$rel"
+        info "удалён $rel"
+        removed=$((removed + 1))
+    elif [[ -f "$CONFIG_DIR/$rel" ]]; then
+        rm -f "$CONFIG_DIR/$rel"
+        info "удалён $rel"
+        removed=$((removed + 1))
+    fi
+}
+
+if [[ -f "$MANIFEST" ]]; then
+    while IFS= read -r rel; do
+        remove_path "$rel"
+    done < "$MANIFEST"
+    rm -f "$MANIFEST"
+    info "манифест установки удалён"
+else
+    # 1.0.0 ставился без манифеста: убираем известный набор файлов.
+    remove_path "AGENTS.md"
+    for name in implementer plan reviewer; do
+        remove_path "agent/$name.md"
+    done
+    for name in prd tdd review; do
+        remove_path "command/$name.md"
+    done
+    for name in prd-authoring tdd-workflow; do
+        remove_path "skill/$name"
+    done
 fi
-
-for name in implementer plan reviewer; do
-    if [[ -f "$CONFIG_DIR/agent/$name.md" ]]; then
-        rm -f "$CONFIG_DIR/agent/$name.md"
-        info "удалён agent/$name.md"
-        removed=$((removed + 1))
-    fi
-done
-
-for name in prd tdd review; do
-    if [[ -f "$CONFIG_DIR/command/$name.md" ]]; then
-        rm -f "$CONFIG_DIR/command/$name.md"
-        info "удалён command/$name.md"
-        removed=$((removed + 1))
-    fi
-done
-
-for name in prd-authoring tdd-workflow; do
-    if [[ -d "$CONFIG_DIR/skill/$name" ]]; then
-        rm -rf "${CONFIG_DIR:?}/skill/$name"
-        info "удалён skill/$name"
-        removed=$((removed + 1))
-    fi
-done
 
 python3 - "$CONFIG_DIR/opencode.json" <<'PY' 2>/dev/null || true
 import json

@@ -44,13 +44,27 @@ for dir in agent command skill; do
 done
 
 mkdir -p "$CONFIG_DIR/agent" "$CONFIG_DIR/command" "$CONFIG_DIR/skill"
+MANIFEST="$CONFIG_DIR/harness-installed.txt"
+: > "$MANIFEST"
+record() { printf '%s\n' "$1" >> "$MANIFEST"; }
+
 cp "$REPO_DIR/AGENTS.md" "$CONFIG_DIR/AGENTS.md"
-cp "$REPO_DIR"/agents/*.md "$CONFIG_DIR/agent/"
-cp "$REPO_DIR"/commands/*.md "$CONFIG_DIR/command/"
+record "AGENTS.md"
+for file in "$REPO_DIR"/agents/*.md; do
+    name="$(basename "$file")"
+    cp "$file" "$CONFIG_DIR/agent/$name"
+    record "agent/$name"
+done
+for file in "$REPO_DIR"/commands/*.md; do
+    name="$(basename "$file")"
+    cp "$file" "$CONFIG_DIR/command/$name"
+    record "command/$name"
+done
 for skill_dir in "$REPO_DIR"/skills/*/; do
     name="$(basename "$skill_dir")"
     rm -rf "${CONFIG_DIR:?}/skill/$name"
     cp -R "$skill_dir" "$CONFIG_DIR/skill/$name"
+    record "skill/$name"
     info "скилл $name"
 done
 info "правила, агенты и команды скопированы"
@@ -92,6 +106,7 @@ with open(target_path, "w") as handle:
     handle.write("\n")
 PY
 info "opencode.json обновлён: model, default_agent, permissions; провайдер и mcp сохранены"
+info "манифест установки: $MANIFEST"
 
 printf '\nУстановлено в %s\n' "$CONFIG_DIR"
 printf 'Выйди из opencode и запусти заново — конфиг читается только при старте.\n\n'
