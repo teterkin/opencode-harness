@@ -45,6 +45,48 @@ contains "README: использование" "## Как пользоватьс�
 contains "README: архитектура" "## Что где лежит" "README.md"
 contains "README: версии" "## Версии и совместимость" "README.md"
 
+ORDER_CHECK="$(python3 - "$REPO_DIR/README.md" <<'PY'
+import sys
+
+required = [
+    "## Зачем нужен харнес",
+    "## Установка",
+    "## Как пользоваться",
+    "## Что где лежит",
+    "## Версии и совместимость",
+]
+text = open(sys.argv[1], encoding="utf-8").read()
+positions = [text.find(heading) for heading in required]
+if -1 in positions:
+    print("нет секции: " + required[positions.index(-1)])
+elif positions != sorted(positions):
+    print("порядок: " + ", ".join(required))
+else:
+    print("ok")
+PY
+)"
+if [[ "$ORDER_CHECK" == "ok" ]]; then
+    printf '  ok   README: пять секций в нужном порядке\n'
+    PASS=$((PASS + 1))
+else
+    printf '  FAIL README: пять секций в нужном порядке (%s)\n' "$ORDER_CHECK"
+    FAIL=$((FAIL + 1))
+fi
+
+contains "README: матрица 2.0.0" "| 2.0.0 |" "README.md"
+contains "README: opencode 2.3.0" "2.3.0" "README.md"
+contains "README: APPROVE не заменяет тесты" "APPROVE" "README.md"
+contains "README: команда /release" "/release" "README.md"
+contains "README: doctor" "tests/doctor.sh" "README.md"
+
+if grep -q 'opencode debug skill\|opencode debug agent' "$REPO_DIR/README.md"; then
+    printf '  FAIL README: остались команды opencode v1 (debug skill/agent)\n'
+    FAIL=$((FAIL + 1))
+else
+    printf '  ok   README: нет команд opencode v1\n'
+    PASS=$((PASS + 1))
+fi
+
 echo
 echo "== AGENTS.md: каркас проекта =="
 contains "AGENTS.md: команды проверок" "typecheck" "AGENTS.md"
