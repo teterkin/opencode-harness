@@ -82,7 +82,22 @@ contains "README: тринадцать правил" "Тринадцать пр�
 contains "README: граница проекта" "external_directory: ask" "README.md"
 contains "README: корень репозитория" "git rev-parse --show-toplevel" "README.md"
 contains "README: семь шагов" "семи шагов" "README.md"
+contains "README: ревью — один проход" "один проход, не цикл" "README.md"
+contains "README: ревью — решение, а не недоделка" "Это решение, а не недоделка" "README.md"
+contains "README: матрица 2.7.0" "| 2.7.0 |" "README.md"
 contains "workflow: отдельные согласия" "отдельного согласия" "docs/workflow.md"
+contains "workflow: ревью — один проход" "один отдельный проход" "docs/workflow.md"
+contains "AGENTS.md: ревью — не цикл" "Review is one separate pass, not a loop" "AGENTS.md"
+contains "review: сначала находки" "do not fix anything yet" "commands/review.md"
+contains "PRD 2.7: авто-цикл в non-goals" "Автоматический цикл" "docs/prd/2.7.md"
+
+if grep -rq '/goal' "$REPO_DIR/commands"; then
+    printf '  FAIL commands: /goal не используется в командах\n'
+    FAIL=$((FAIL + 1))
+else
+    printf '  ok   commands: /goal не используется в командах\n'
+    PASS=$((PASS + 1))
+fi
 contains "project-kit: метаданные репозитория" "Repository metadata" \
     "skills/project-kit/SKILL.md"
 contains "project-kit: gh repo edit" "gh repo edit" "skills/project-kit/SKILL.md"

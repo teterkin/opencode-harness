@@ -7,4 +7,6 @@ template: |
 
   Focus on: correctness, whether every new behavior has a test that would fail
   without the change, weakened or skipped assertions, scope creep, security, and
-  the real lint/typecheck/test commands for this repo. Do not commit anything.
+  the real lint/typecheck/test commands for this repo. Report the findings first
+  and do not fix anything yet; wait for my decision before changing code. Do not
+  commit anything.

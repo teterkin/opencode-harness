@@ -55,6 +55,10 @@ For small, obvious, low-risk changes, skip the PRD and say so in one line.
   and the self-tests must run.
 - Then report: what changed, what you ran, the actual output, and what remains
   unverified. A check that could not run is stated, not implied as green.
+- Review is one separate pass, not a loop: the `reviewer` subagent returns
+  findings, the user decides what to fix, fixes go through TDD and a fresh
+  check run, and a second review happens only on request. Do not use `/goal` or
+  an automatic find -> fix -> retest cycle.
 
 ## 6. Development flow and git
 
