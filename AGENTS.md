@@ -53,6 +53,13 @@ For small, obvious, low-risk changes, skip the PRD and say so in one line.
 - If the repository has `tests/doctor.sh`, run it first. Exit code 2 means the
   running tool version differs from the tested one: the harness is unverified
   and the self-tests must run.
+- A security check declared by the project is one of the checks: a `security` /
+  `audit` script, a scanner config or ignore list (`.semgrep.yml`,
+  `.gitleaks.toml`, `.trivyignore`), or a CI job. Run it the same way as the
+  tests. If it cannot run — not installed, needs network, needs credentials —
+  say so in one line. Never imply it is green.
+- A finding you decide to keep is written down once with the reason. A scanner
+  run that stays red without an explanation is not a finished review.
 - Then report: what changed, what you ran, the actual output, and what remains
   unverified. A check that could not run is stated, not implied as green.
 - Review is one separate pass, not a loop: the `reviewer` subagent returns
@@ -115,6 +122,16 @@ covers the release only — it does not cover pushing pending commits.
   output reported. A rebuild must never silently pick up new versions.
 - Base images and external sources are pinned too: image tag (or digest),
   and `git clone` by commit SHA with an explicit ref.
+- Vendored code and downloaded assets are verified before use, not trusted:
+  a recorded version or commit, plus a checksum compared at load time. An
+  artifact that fails the check is an error, never a warning.
+- Record the version of every third-party file where licenses are listed
+  (`NOTICE`, `THIRD_PARTY`, a `LICENSE` appendix). "Taken from commit X" is a
+  commit, not a version: without a version the file cannot be matched against
+  advisories.
+- Never execute fetched or vendored code with the user's privileges — `eval`,
+  `new Function`, `vm` — before its checksum matches. If the format forces
+  evaluation, verify first and fail closed.
 
 ## 8. Releases use SemVer
 

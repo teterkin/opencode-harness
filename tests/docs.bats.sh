@@ -85,6 +85,14 @@ contains "README: семь шагов" "семи шагов" "README.md"
 contains "README: ревью — один проход" "один проход, не цикл" "README.md"
 contains "README: ревью — решение, а не недоделка" "Это решение, а не недоделка" "README.md"
 contains "README: матрица 2.7.0" "| 2.7.0 |" "README.md"
+contains "README: SAST вне ответственности" "SAST" "README.md"
+contains "README: secret scanning" "Secret Scanning" "README.md"
+contains "README: SCA" "SCA" "README.md"
+contains "README: SAST и SCA в CI/CD" "CI/CD" "README.md"
+contains "README: проверка безопасности в правилах" \
+    "Заявленная проверка безопасности" "README.md"
+contains "README: вендоренный код в правилах" "Вендоренный код не доверяют" \
+    "README.md"
 contains "workflow: отдельные согласия" "отдельного согласия" "docs/workflow.md"
 contains "workflow: ревью — один проход" "один отдельный проход" "docs/workflow.md"
 contains "AGENTS.md: ревью — не цикл" "Review is one separate pass, not a loop" "AGENTS.md"
@@ -136,6 +144,33 @@ contains "AGENTS.md: секреты" "secrets" "AGENTS.md"
 contains "AGENTS.md: ветки" "feat/<slug>" "AGENTS.md"
 
 echo
+echo "== AGENTS.md: вендоренный код и проверки безопасности =="
+contains "AGENTS.md: вендоренный код проверяется" \
+    "Vendored code and downloaded assets are verified before use" "AGENTS.md"
+contains "AGENTS.md: чек-сумма при загрузке" "checksum compared at load time" \
+    "AGENTS.md"
+contains "AGENTS.md: версия третьего файла" \
+    "Record the version of every third-party file" "AGENTS.md"
+contains "AGENTS.md: без eval до проверки" \
+    "Never execute fetched or vendored code" "AGENTS.md"
+contains "AGENTS.md: fail closed" "fail closed" "AGENTS.md"
+contains "AGENTS.md: security-проверка проекта" \
+    "A security check declared by the project is one of the checks" "AGENTS.md"
+contains "AGENTS.md: не подразумевать зелёным" "Never imply it is green" \
+    "AGENTS.md"
+contains "AGENTS.md: находка с причиной" \
+    "written down once with the reason" "AGENTS.md"
+
+RULES_COUNT="$(grep -c '^## [0-9]' "$REPO_DIR/AGENTS.md")"
+if [[ "$RULES_COUNT" -eq 13 ]]; then
+    printf '  ok   AGENTS.md: тринадцать правил, без новых разделов\n'
+    PASS=$((PASS + 1))
+else
+    printf '  FAIL AGENTS.md: ожидал 13 правил, нашёл %s\n' "$RULES_COUNT"
+    FAIL=$((FAIL + 1))
+fi
+
+echo
 echo "== шаблоны =="
 present "шаблон проектного AGENTS.md" "templates/AGENTS.md"
 contains "шаблон AGENTS.md: команды" "## Commands" "templates/AGENTS.md"
@@ -150,6 +185,10 @@ contains "workflow: проверка границы" "Проверка гран�
 contains "workflow: соседний репозиторий" "Соседний репозиторий" "docs/workflow.md"
 contains "workflow: запись вне проекта" "Запись вне проекта" "docs/workflow.md"
 contains "workflow: самостоятельный коммит" "Самостоятельный коммит" "docs/workflow.md"
+contains "workflow: проверка безопасности" "Проверка безопасности" \
+    "docs/workflow.md"
+contains "workflow: SAST в CI/CD" "SAST" "docs/workflow.md"
+contains "workflow: вендоренный код" "Вендоренный" "docs/workflow.md"
 
 echo
 printf 'итого: %d ok, %d провалено\n' "$PASS" "$FAIL"
